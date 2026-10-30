@@ -1,0 +1,944 @@
+[
+ {
+  "err": 1,
+  "ss": 1,
+  "faulty_file": "2_HPLN0601.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "F28:G28",
+  "corrected_file": "1_HPLN0531.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "F28:G28",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Inserted",
+  "info": "Range error",
+  "faulty": {
+   "cell": "F28",
+   "formula": "=SUM(F25:F25)",
+   "row_label": "Enron North America Spot/3959",
+   "col_header": "PRIOR"
+  },
+  "corrected": {
+   "cell": "F28",
+   "formula": "=SUM(F25:F26)",
+   "row_label": "Enron North America Spot/3959",
+   "col_header": "PRIOR"
+  }
+ },
+ {
+  "err": 2,
+  "ss": 2,
+  "faulty_file": "1_Southpoint Gas Model.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "I34",
+  "corrected_file": "2_Southpoint Gas Model.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "I34",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "I34",
+   "formula": "=SUM(I9:I33)",
+   "row_label": "",
+   "col_header": "Total Gas Usage"
+  },
+  "corrected": {
+   "cell": "I34",
+   "formula": "=SUM(I8:I33)",
+   "row_label": "",
+   "col_header": "Total Gas Usage"
+  }
+ },
+ {
+  "err": 3,
+  "ss": 3,
+  "faulty_file": "1-BMSPT051.xls",
+  "faulty_sheet": "BMSPT066",
+  "faulty_cells": "W43",
+  "corrected_file": "2-BMSPT051.xls",
+  "corrected_sheet": "BMSPT066",
+  "corrected_cells": "W43",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "W43",
+   "formula": "=SUM(W38:W38)",
+   "row_label": "Total Projected",
+   "col_header": "Net LONG/ (SHORT)"
+  },
+  "corrected": {
+   "cell": "W43",
+   "formula": "=SUM(W37:W38)",
+   "row_label": "Total Projected",
+   "col_header": "Net LONG/ (SHORT)"
+  }
+ },
+ {
+  "err": 4,
+  "ss": 3,
+  "faulty_file": "1-BMSPT051.xls",
+  "faulty_sheet": "BMSPT066",
+  "faulty_cells": "C43:V43",
+  "corrected_file": null,
+  "corrected_sheet": null,
+  "corrected_cells": null,
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Unchanged",
+  "info": "Range error",
+  "faulty": {
+   "cell": "C43",
+   "formula": "=SUM(C32:C38)",
+   "row_label": "Total Projected",
+   "col_header": "MTD Adjustment"
+  },
+  "corrected": {}
+ },
+ {
+  "err": 5,
+  "ss": 4,
+  "faulty_file": "1_Tricia Roome.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "L16",
+  "corrected_file": "2_Tricia Roome.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "L16",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "L16",
+   "formula": "=AVERAGE(F46:H52)",
+   "row_label": "Summer 04",
+   "col_header": "Transco Z5"
+  },
+  "corrected": {
+   "cell": "L16",
+   "formula": "=AVERAGE(H46:H52)",
+   "row_label": "Summer 04",
+   "col_header": "Transco Z5"
+  }
+ },
+ {
+  "err": 6,
+  "ss": 5,
+  "faulty_file": "1_July01invoice rev1.xls",
+  "faulty_sheet": "jul01",
+  "faulty_cells": "AL44",
+  "corrected_file": "2_July01invoice rev1.xls",
+  "corrected_sheet": "July 01",
+  "corrected_cells": "AL44",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "AL44",
+   "formula": "=SUM(AL11:AL43)",
+   "row_label": "TOTAL",
+   "col_header": "Fee"
+  },
+  "corrected": {
+   "cell": "AL44",
+   "formula": "=SUM(AL12:AL43)",
+   "row_label": "TOTAL",
+   "col_header": "Fee"
+  }
+ },
+ {
+  "err": 7,
+  "ss": 6,
+  "faulty_file": "1_Plan - Real-Time Trading.xls",
+  "faulty_sheet": "Real Time",
+  "faulty_cells": "V23",
+  "corrected_file": "2_Plan - Real-Time Trading.xls",
+  "corrected_sheet": "Real Time",
+  "corrected_cells": "V23",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "V23",
+   "formula": "=SUM(V11:V22)",
+   "row_label": "Total Headcount.",
+   "col_header": "2002"
+  },
+  "corrected": {
+   "cell": "V23",
+   "formula": "=SUM(V11:V16)",
+   "row_label": "Total Headcount.",
+   "col_header": "2002"
+  }
+ },
+ {
+  "err": 8,
+  "ss": 7,
+  "faulty_file": "1_5_14act.xls",
+  "faulty_sheet": "Deals",
+  "faulty_cells": "AD142",
+  "corrected_file": "2_5_14act.xls",
+  "corrected_sheet": "Deals",
+  "corrected_cells": "AD142",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "AD142",
+   "formula": "=SUM(AD129:AD131)",
+   "row_label": "EPE Purch from EPMI",
+   "col_header": "Total Volume"
+  },
+  "corrected": {
+   "cell": "AD142",
+   "formula": "=SUM(AD120:AD131)",
+   "row_label": "EPE Purch from EPMI",
+   "col_header": "Total Volume"
+  }
+ },
+ {
+  "err": 9,
+  "ss": 8,
+  "faulty_file": "1_Sun Devil Project Request.XLS",
+  "faulty_sheet": "Cost Estimate Summary",
+  "faulty_cells": "L23",
+  "corrected_file": "2_Sun Devil Project Request.XLS",
+  "corrected_sheet": "Cost Estimate Summary",
+  "corrected_cells": "L23",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "L23",
+   "formula": "=SUM(L14:L20)",
+   "row_label": "Total San Juan Expansion",
+   "col_header": "Est. Costs"
+  },
+  "corrected": {
+   "cell": "L23",
+   "formula": "=SUM(L14:L21)",
+   "row_label": "Total San Juan Expansion",
+   "col_header": "Est. Costs"
+  }
+ },
+ {
+  "err": 10,
+  "ss": 9,
+  "faulty_file": "1_ONEOKRECAP2001.xls",
+  "faulty_sheet": "OCT 01",
+  "faulty_cells": "T39",
+  "corrected_file": "2_ONEOKRECAP2001.xls",
+  "corrected_sheet": "OCT 01",
+  "corrected_cells": "T39",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong formula",
+  "faulty": {
+   "cell": "T39",
+   "formula": "=N38-9=SUM(T6:T36)+T38",
+   "row_label": "OC TOBER CUMULATIVE",
+   "col_header": "HEMPHILL/CANADIAN"
+  },
+  "corrected": {
+   "cell": "T39",
+   "formula": "=SUM(T6:T36)+T38",
+   "row_label": "OC TOBER CUMULATIVE",
+   "col_header": "HEMPHILL/CANADIAN"
+  }
+ },
+ {
+  "err": 11,
+  "ss": 10,
+  "faulty_file": "1_SunDevil01CostSummary.xls",
+  "faulty_sheet": "EPSunDevil",
+  "faulty_cells": "F10",
+  "corrected_file": "2_SunDevil01CostSummary.xls",
+  "corrected_sheet": "EPSunDevil",
+  "corrected_cells": "F10",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong reference",
+  "faulty": {
+   "cell": "F10",
+   "formula": "=D5*1500",
+   "row_label": "Added Compression",
+   "col_header": "High End Cost"
+  },
+  "corrected": {
+   "cell": "F10",
+   "formula": "=D10*1500",
+   "row_label": "Added Compression",
+   "col_header": "High End Cost"
+  }
+ },
+ {
+  "err": 12,
+  "ss": 11,
+  "faulty_file": "1_Citrus Pass-Through 12.01.00.xls",
+  "faulty_sheet": "Data",
+  "faulty_cells": "D13",
+  "corrected_file": "2_Citrus Pass-Through 12.01.00.xls",
+  "corrected_sheet": "Data",
+  "corrected_cells": "D13",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "D13",
+   "formula": "=C6*(1+C12*(B52/364.25))-C6",
+   "row_label": "tot volume",
+   "col_header": "Fees to Citrus"
+  },
+  "corrected": {
+   "cell": "D13",
+   "formula": "=C6*(1+C12/2)^(2*(B52/364.25))-C6",
+   "row_label": "tot volume",
+   "col_header": "Fees to Citrus"
+  }
+ },
+ {
+  "err": 13,
+  "ss": 12,
+  "faulty_file": "1_Huber - Existing & Proposed Deals 111201.xls",
+  "faulty_sheet": "Curves",
+  "faulty_cells": "V5:V341",
+  "corrected_file": "2_Huber - Existing & Proposed Deals 111201.xls",
+  "corrected_sheet": "Curves",
+  "corrected_cells": "AA5:AA341",
+  "type": "Quantitative",
+  "subtype": "Omission",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "V5",
+   "formula": "=$B5+T5+U5",
+   "row_label": "",
+   "col_header": "Price"
+  },
+  "corrected": {
+   "cell": "AA5",
+   "formula": "=$B5+X5+Y5+Z5",
+   "row_label": "",
+   "col_header": "Price"
+  }
+ },
+ {
+  "err": 14,
+  "ss": 13,
+  "faulty_file": "1_Agro Case Question 3--Jeff.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "H33",
+  "corrected_file": "2_Agro Case Question 3--Jeff revised.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "H33",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "H33",
+   "formula": "=SUM(H28:H32)",
+   "row_label": "Total",
+   "col_header": ""
+  },
+  "corrected": {
+   "cell": "H33",
+   "formula": "=H28+H32-H30",
+   "row_label": "Net effect of unusual gains and lossesTotal",
+   "col_header": ""
+  }
+ },
+ {
+  "err": 15,
+  "ss": 13,
+  "faulty_file": "1_Agro Case Question 3--Jeff.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "I35",
+  "corrected_file": "2_Agro Case Question 3--Jeff revised.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "I35",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "I35",
+   "formula": "=I29-H33",
+   "row_label": "Income before extraordinary items and effect of accounting c",
+   "col_header": "1995"
+  },
+  "corrected": {
+   "cell": "I35",
+   "formula": "=+I22-H33",
+   "row_label": "Income before extraordinary items and effect of accounting c",
+   "col_header": "1995"
+  }
+ },
+ {
+  "err": 16,
+  "ss": 13,
+  "faulty_file": "1_Agro Case Question 3--Jeff.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "I38",
+  "corrected_file": "2_Agro Case Question 3--Jeff revised.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "I43",
+  "type": "Quantitative",
+  "subtype": "Omission",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "I38",
+   "formula": "=I35-H36",
+   "row_label": "Net Income",
+   "col_header": "1995"
+  },
+  "corrected": {
+   "cell": "I43",
+   "formula": "=I38+H41",
+   "row_label": "Net Income",
+   "col_header": "1995"
+  }
+ },
+ {
+  "err": 17,
+  "ss": 14,
+  "faulty_file": "1_Book Request Form Central 010702.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "B30:C35; B42:C47",
+  "corrected_file": "2_Book Request Form Central010702Revised.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "B30:C35; B42:C47",
+  "type": "Qualitative",
+  "subtype": null,
+  "cell_type": "Label",
+  "change": "Fixed",
+  "info": "Wrong labels",
+  "faulty": {
+   "cell": "B30",
+   "formula": "FB-CENT1",
+   "row_label": "",
+   "col_header": "FB-CENT6"
+  },
+  "corrected": {
+   "cell": "B30",
+   "formula": "PB-CENT1",
+   "row_label": "",
+   "col_header": "FB-CENT6"
+  }
+ },
+ {
+  "err": 18,
+  "ss": 15,
+  "faulty_file": "1_EES April Dailies.xls",
+  "faulty_sheet": "4-16, 4-15",
+  "faulty_cells": "K8:K31",
+  "corrected_file": "2_EES April Dailies.xls",
+  "corrected_sheet": "4-16, 4-15",
+  "corrected_cells": "K8:K31",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Value",
+  "change": "Fixed",
+  "info": "Wrong values",
+  "faulty": {
+   "cell": "K8",
+   "formula": "115",
+   "row_label": "",
+   "col_header": "Other EnPower"
+  },
+  "corrected": {
+   "cell": "K8",
+   "formula": "115.8",
+   "row_label": "",
+   "col_header": "Other EnPower"
+  }
+ },
+ {
+  "err": 19,
+  "ss": 16,
+  "faulty_file": "1_PSEG - Enron Bankruptcy Revised.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "B13:O13; B25:O25; B37:O37",
+  "corrected_file": null,
+  "corrected_sheet": null,
+  "corrected_cells": null,
+  "type": "Quantitative",
+  "subtype": "Omission",
+  "cell_type": "Formula",
+  "change": "Unchanged",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "B13",
+   "formula": "=(B12/C13-B12)",
+   "row_label": "Fuel - %",
+   "col_header": "Enron's invoices paid by PSE&G for gas purchases"
+  },
+  "corrected": {}
+ },
+ {
+  "err": 20,
+  "ss": 16,
+  "faulty_file": "1_PSEG - Enron Bankruptcy Revised.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "H17:N17; H29:N29; H41:N41",
+  "corrected_file": null,
+  "corrected_sheet": null,
+  "corrected_cells": null,
+  "type": "Quantitative",
+  "subtype": "Omission",
+  "cell_type": "Value",
+  "change": "Unchanged",
+  "info": "Wrong values",
+  "faulty": {
+   "cell": "H17",
+   "formula": "0.0158",
+   "row_label": "GPS",
+   "col_header": ""
+  },
+  "corrected": {}
+ },
+ {
+  "err": 21,
+  "ss": 17,
+  "faulty_file": null,
+  "faulty_sheet": null,
+  "faulty_cells": null,
+  "corrected_file": "1_Breakout Contracts.xls",
+  "corrected_sheet": "Contract Payment Summary",
+  "corrected_cells": "F6",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {},
+  "corrected": {
+   "cell": "F6",
+   "formula": "='Change Orders'!D8",
+   "row_label": "PSCO - Units 13-16",
+   "col_header": "Order Pymt."
+  }
+ },
+ {
+  "err": 22,
+  "ss": 18,
+  "faulty_file": "1_CrackSpreadOptions.xls",
+  "faulty_sheet": "Crack Spread Option",
+  "faulty_cells": "M9:M14",
+  "corrected_file": "2_CrackSpreadOptions.xls",
+  "corrected_sheet": "Crack Spread Option",
+  "corrected_cells": "M9:M14",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "M9",
+   "formula": "=HEAT($B9,$C9,$D9,$E9,$F9,$G9,$H9,$I9-$C$5,$K9,M$7)",
+   "row_label": "",
+   "col_header": "Price"
+  },
+  "corrected": {
+   "cell": "M9",
+   "formula": "=C9*HEAT($B9,$C9,$D9,$E9,$F9,$G9,$H9,$I9-$C$5,$K9,M$7)",
+   "row_label": "",
+   "col_header": "Price"
+  }
+ },
+ {
+  "err": 23,
+  "ss": 19,
+  "faulty_file": "1_EPE_MAY_2002.xls",
+  "faulty_sheet": "MAY(2)",
+  "faulty_cells": "AE18:AE41",
+  "corrected_file": "2_EPE_MAY_2002.xls",
+  "corrected_sheet": "MAY(2)",
+  "corrected_cells": "AE18:AE41",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "AE18",
+   "formula": "=SUM(M18:Q18,V18:V18)",
+   "row_label": "0100",
+   "col_header": "NET FOUR CORNERS"
+  },
+  "corrected": {
+   "cell": "AE18",
+   "formula": "=SUM(M18:Q18,V18:X18)",
+   "row_label": "0100",
+   "col_header": "NET FOUR CORNERS"
+  }
+ },
+ {
+  "err": 24,
+  "ss": 20,
+  "faulty_file": "1_oct2301.XLS",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "D112",
+  "corrected_file": "2_oct2301.XLS",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "D112",
+  "type": "Qualitative",
+  "subtype": null,
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "D112",
+   "formula": "=SUM(D5:D107)",
+   "row_label": "TOTAL",
+   "col_header": "SHARES"
+  },
+  "corrected": {
+   "cell": "D112",
+   "formula": "=SUM(D5:D109)",
+   "row_label": "TOTAL",
+   "col_header": "SHARES"
+  }
+ },
+ {
+  "err": 25,
+  "ss": 21,
+  "faulty_file": "1_SoCalIntCalc.xls",
+  "faulty_sheet": "Sheet1 (2)",
+  "faulty_cells": "F94",
+  "corrected_file": "2_SoCalIntCalc.xls",
+  "corrected_sheet": "Sheet1 (2)",
+  "corrected_cells": "F94",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "F94",
+   "formula": "=B94",
+   "row_label": "",
+   "col_header": ""
+  },
+  "corrected": {
+   "cell": "F94",
+   "formula": "=F91+B94",
+   "row_label": "",
+   "col_header": ""
+  }
+ },
+ {
+  "err": 26,
+  "ss": 22,
+  "faulty_file": "1_ENA-Cal Dec Liq.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "C7",
+  "corrected_file": "2_ENA-Cal Dec Liq.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "C7",
+  "type": "Qualitative",
+  "subtype": null,
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "File reference not working",
+  "faulty": {
+   "cell": "C7",
+   "formula": "='[3]dec pcs'!$O$576",
+   "row_label": "PCS",
+   "col_header": ""
+  },
+  "corrected": {
+   "cell": "C7",
+   "formula": "='[3]dec pcs'!$O$576",
+   "row_label": "PCS",
+   "col_header": ""
+  }
+ },
+ {
+  "err": 27,
+  "ss": 23,
+  "faulty_file": "1_enron corp infomation request - Nov 2001.xls",
+  "faulty_sheet": "EGS EXP",
+  "faulty_cells": "W12",
+  "corrected_file": "2_enron corp infomation request-egas.xls",
+  "corrected_sheet": "EGS EXP",
+  "corrected_cells": "W12",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "W12",
+   "formula": "=SUM(C12:M12)",
+   "row_label": "Subtotal",
+   "col_header": "Total"
+  },
+  "corrected": {
+   "cell": "W12",
+   "formula": "=SUM(C12:V12)",
+   "row_label": "Subtotal",
+   "col_header": "Total"
+  }
+ },
+ {
+  "err": 28,
+  "ss": 24,
+  "faulty_file": "1_CA rate exposure final 8-28 rev.xls",
+  "faulty_sheet": "New",
+  "faulty_cells": "C10:E14; H10:J14; M10:O14; C25:E29; etc.",
+  "corrected_file": "2_CA rate exposure final 8-28 rev1.xls",
+  "corrected_sheet": "New",
+  "corrected_cells": "C10:E14; H10:J14; M10:O14; C25:E29; etc.",
+  "type": "Quantitative",
+  "subtype": "Omission",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "C10",
+   "formula": "=$B10*C$6*C$7",
+   "row_label": "",
+   "col_header": "A"
+  },
+  "corrected": {
+   "cell": "C10",
+   "formula": "=$B10*C$6*C$7*C$8",
+   "row_label": "",
+   "col_header": "A"
+  }
+ },
+ {
+  "err": 29,
+  "ss": 25,
+  "faulty_file": "1_Ogleth200103.xls",
+  "faulty_sheet": "external",
+  "faulty_cells": "D11:D35",
+  "corrected_file": "2_Ogleth200105.xls",
+  "corrected_sheet": "external",
+  "corrected_cells": "D11:D35",
+  "type": "Quantitative",
+  "subtype": "Logical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong calculation",
+  "faulty": {
+   "cell": "D11",
+   "formula": "=ROUND(+C11*(1-0.019),0)",
+   "row_label": "",
+   "col_header": "DELIVERY"
+  },
+  "corrected": {
+   "cell": "D11",
+   "formula": "=C11*0.9811",
+   "row_label": "",
+   "col_header": "DELIVERY"
+  }
+ },
+ {
+  "err": 30,
+  "ss": 25,
+  "faulty_file": "1_Ogleth200103.xls",
+  "faulty_sheet": "external",
+  "faulty_cells": "E36:E37",
+  "corrected_file": "2_Ogleth200105.xls",
+  "corrected_sheet": "external",
+  "corrected_cells": "E36:E37",
+  "type": "Qualitative",
+  "subtype": null,
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong reference",
+  "faulty": {
+   "cell": "E36",
+   "formula": "=+E34",
+   "row_label": "",
+   "col_header": "BURN"
+  },
+  "corrected": {
+   "cell": "E36",
+   "formula": "=+E35",
+   "row_label": "",
+   "col_header": "BURN"
+  }
+ },
+ {
+  "err": 31,
+  "ss": 26,
+  "faulty_file": "2_yr 2001 Commissioning Summary 2-26-02.xls",
+  "faulty_sheet": "Mar 2002",
+  "faulty_cells": "I132",
+  "corrected_file": "1_yr 2001 Commissioning Summary 2-26-02.xls",
+  "corrected_sheet": "Mar 2002",
+  "corrected_cells": "I132",
+  "type": "Qualitative",
+  "subtype": null,
+  "cell_type": "Formula",
+  "change": "Inserted",
+  "info": "Fixed Value",
+  "faulty": {
+   "cell": "I132",
+   "formula": "1",
+   "row_label": "B-8",
+   "col_header": "Turbines Included"
+  },
+  "corrected": {
+   "cell": "I132",
+   "formula": "=IF(E132>0,1,0)",
+   "row_label": "B-8",
+   "col_header": "Turbines Included"
+  }
+ },
+ {
+  "err": 32,
+  "ss": 27,
+  "faulty_file": "1_ENA_PGE_JUNE_1_2002.xls",
+  "faulty_sheet": "JD-MAL OR CPTJK TRANS",
+  "faulty_cells": "H12:H17; H34:H35",
+  "corrected_file": "2_ENA_PGE_JUNE_3_2002.xls",
+  "corrected_sheet": "JD-MAL OR CPTJK TRANS",
+  "corrected_cells": "H11:H16; H33:H34",
+  "type": "Qualitative",
+  "subtype": null,
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "H12",
+   "formula": "=SUM(B12:F12)",
+   "row_label": "0100",
+   "col_header": "Total In To PGE Trans"
+  },
+  "corrected": {
+   "cell": "H11",
+   "formula": "",
+   "row_label": "0100",
+   "col_header": ""
+  }
+ },
+ {
+  "err": 33,
+  "ss": 28,
+  "faulty_file": "1_Southpoint Gas Model.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "I25:I31",
+  "corrected_file": "2_Southpoint Gas Model.xls",
+  "corrected_sheet": "Sheet1",
+  "corrected_cells": "I25:I31",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Wrong reference",
+  "faulty": {
+   "cell": "I25",
+   "formula": "=G24*H25",
+   "row_label": "he23",
+   "col_header": "Total Gas Usage"
+  },
+  "corrected": {
+   "cell": "I25",
+   "formula": "=G25*H25",
+   "row_label": "he23",
+   "col_header": "Total Gas Usage"
+  }
+ },
+ {
+  "err": 34,
+  "ss": 28,
+  "faulty_file": "1_Southpoint Gas Model.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "G33; I34",
+  "corrected_file": null,
+  "corrected_sheet": null,
+  "corrected_cells": null,
+  "type": "Qualitative",
+  "subtype": null,
+  "cell_type": "Formula",
+  "change": "Unchanged",
+  "info": "Range error",
+  "faulty": {
+   "cell": "G33",
+   "formula": "=SUM(G8:G32)",
+   "row_label": "",
+   "col_header": "Total MW"
+  },
+  "corrected": {}
+ },
+ {
+  "err": 35,
+  "ss": 29,
+  "faulty_file": "1_EI365reveff060800.xls",
+  "faulty_sheet": "Sheet1",
+  "faulty_cells": "F8",
+  "corrected_file": null,
+  "corrected_sheet": null,
+  "corrected_cells": null,
+  "type": "Qualitative",
+  "subtype": null,
+  "cell_type": "Formula",
+  "change": "Unchanged",
+  "info": "Formula: = SUM(D8*E8)",
+  "faulty": {
+   "cell": "F8",
+   "formula": "=SUM(D8*E8)",
+   "row_label": "EI 365",
+   "col_header": "PVR Volume"
+  },
+  "corrected": {}
+ },
+ {
+  "err": 36,
+  "ss": 30,
+  "faulty_file": "1_Global Hot List 1207.xls",
+  "faulty_sheet": "Hotlist - Identified ",
+  "faulty_cells": "M22; M37",
+  "corrected_file": "2_Global Hot List 0111.xls",
+  "corrected_sheet": "Hotlist - Identified ",
+  "corrected_cells": "I22; I37",
+  "type": "Quantitative",
+  "subtype": "Mechanical",
+  "cell_type": "Formula",
+  "change": "Fixed",
+  "info": "Range error",
+  "faulty": {
+   "cell": "M22",
+   "formula": "=SUM(M21:M21)",
+   "row_label": "SUBTOTAL",
+   "col_header": "Value"
+  },
+  "corrected": {
+   "cell": "I22",
+   "formula": "=SUM(I13:I21)",
+   "row_label": "SUBTOTAL",
+   "col_header": "Value"
+  }
+ }
+]
