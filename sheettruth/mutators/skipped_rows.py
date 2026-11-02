@@ -1,8 +1,11 @@
-"""skipped_rows: shrink a range so that one to three real data cells fall outside the aggregate.
+"""skipped_rows: shrink a range so that real data cells fall outside the aggregate.
 
 Fires only when the formula is a single aggregator over one vertical or horizontal range of at
-least four cells, and the cells dropped are non-blank and labelled. The dropped cells visibly
-belong to the block, which keeps the injected error both real and learnable.
+least three cells, and the cells dropped are non-blank. Three shapes, weighted like the real
+errors seen in audited workbooks:
+  * one to three cells dropped at the end (rows added after the total was written)
+  * one to three cells dropped at the start (range started one row too late)
+  * the range collapsed to a single cell, written as F25:F25
 """
 from __future__ import annotations
 
@@ -13,9 +16,10 @@ from sheettruth.mutators.base import Mutation, Mutator
 from sheettruth.mutators.common import col_header, replace_once, row_label, shift_ref_text, single_agg_call
 from sheettruth.windows.cellinfo import Cell, CellContext, Ref, Sheet
 
-MIN_RANGE_SIZE = 4
+MIN_RANGE_SIZE = 3
 DROP_COUNT_CHOICES = (1, 1, 2, 3)
-SHRINK_FROM_END_PROBABILITY = 0.75
+SHRINK_FROM_END_PROBABILITY = 0.6
+COLLAPSE_PROBABILITY = 0.2
 
 
 @dataclass
@@ -28,10 +32,10 @@ class Shrink:
 def _shrink_vertical(ref: Ref, sheet: Sheet, k: int, from_end: bool) -> Shrink:
     if from_end:
         rows = range(ref.r2 - k + 1, ref.r2 + 1)
-        text = shift_ref_text(ref, ref.r1, ref.r2 - k, ref.c1, ref.c1)
+        text = shift_ref_text(ref, ref.r1, ref.r2 - k, ref.c1, ref.c1, force_range=True)
     else:
         rows = range(ref.r1, ref.r1 + k)
-        text = shift_ref_text(ref, ref.r1 + k, ref.r2, ref.c1, ref.c1)
+        text = shift_ref_text(ref, ref.r1 + k, ref.r2, ref.c1, ref.c1, force_range=True)
     dropped = [sheet.get(r, ref.c1) for r in rows]
     return Shrink(text, dropped, [row_label(sheet, c.row, c.col) for c in dropped])
 
@@ -39,17 +43,17 @@ def _shrink_vertical(ref: Ref, sheet: Sheet, k: int, from_end: bool) -> Shrink:
 def _shrink_horizontal(ref: Ref, sheet: Sheet, k: int, from_end: bool) -> Shrink:
     if from_end:
         cols = range(ref.c2 - k + 1, ref.c2 + 1)
-        text = shift_ref_text(ref, ref.r1, ref.r1, ref.c1, ref.c2 - k)
+        text = shift_ref_text(ref, ref.r1, ref.r1, ref.c1, ref.c2 - k, force_range=True)
     else:
         cols = range(ref.c1, ref.c1 + k)
-        text = shift_ref_text(ref, ref.r1, ref.r1, ref.c1 + k, ref.c2)
+        text = shift_ref_text(ref, ref.r1, ref.r1, ref.c1 + k, ref.c2, force_range=True)
     dropped = [sheet.get(ref.r1, c) for c in cols]
     return Shrink(text, dropped, [col_header(sheet, c.row, c.col) for c in dropped])
 
 
 class SkippedRows(Mutator):
     name = "skipped_rows"
-    version = "1"
+    version = "2"
 
     def _candidate(self, ctx: CellContext) -> Optional[tuple[str, Ref, Sheet]]:
         call = single_agg_call(ctx.cell.formula)
@@ -79,7 +83,8 @@ class SkippedRows(Mutator):
         if not candidate:
             return None
         func, ref, sheet = candidate
-        k = min(rng.choice(DROP_COUNT_CHOICES), ref.size() - 2)
+        collapse = rng.random() < COLLAPSE_PROBABILITY
+        k = ref.size() - 1 if collapse else min(rng.choice(DROP_COUNT_CHOICES), ref.size() - 2)
         from_end = rng.random() < SHRINK_FROM_END_PROBABILITY
         shrink = (_shrink_vertical if ref.is_vertical else _shrink_horizontal)(ref, sheet, k, from_end)
         if any(c.is_blank for c in shrink.dropped):

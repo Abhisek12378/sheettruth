@@ -6,3 +6,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 *.egg-info/
+
+.pytest_tmp/
+data/test/enron_errors_xlsx/
+data/test/*.jsonl
+/train.jsonl
+/val.jsonl
+reports/uploads/

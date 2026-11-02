@@ -44,6 +44,15 @@ def label_for_ref(ctx: CellContext, ref: Ref) -> str:
     return row_label(sh, ref.r1, ref.c1) or col_header(sh, ref.r1, ref.c1)
 
 
+def ref_label(ctx: CellContext, ref: Ref) -> str:
+    """The label that names a referenced cell from the target's point of view: the column header
+    when the reference sits in the target's own row, the row label otherwise."""
+    sh = ctx.wb.sheet(ref.sheet) or ctx.sheet
+    if ref.r1 == ctx.cell.row and sh is ctx.sheet:
+        return col_header(sh, ref.r1, ref.c1) or row_label(sh, ref.r1, ref.c1)
+    return row_label(sh, ref.r1, ref.c1) or col_header(sh, ref.r1, ref.c1)
+
+
 def target_labels(ctx: CellContext) -> str:
     """Row path plus column path, lowercased, for intent-word checks."""
     return " | ".join(ctx.row_path + ctx.col_path).lower()
@@ -70,14 +79,16 @@ def replace_once(formula: str, old: str, new: str) -> Optional[str]:
     return formula.replace(old, new, 1)
 
 
-def shift_ref_text(ref: Ref, new_r1: int, new_r2: int, new_c1: int, new_c2: int) -> str:
-    """Rebuild a range text keeping the original $ anchors and sheet prefix."""
+def shift_ref_text(ref: Ref, new_r1: int, new_r2: int, new_c1: int, new_c2: int, force_range: bool = False) -> str:
+    """Rebuild a range text keeping the original $ anchors and sheet prefix. With force_range a
+    one-cell result is still written as a range (F25:F25), the way collapsed ranges appear in
+    real workbooks."""
     m = re.match(r"^(?P<sheet>(?:'[^']+'|[A-Za-z0-9_\.]+)!)?(?P<c1>\$?)[A-Za-z]{1,3}(?P<r1>\$?)\d+(?::(?P<c2>\$?)[A-Za-z]{1,3}(?P<r2>\$?)\d+)?$", ref.text)
     sheet = (m.group("sheet") or "") if m else ""
     c1d, r1d = ((m.group("c1") or ""), (m.group("r1") or "")) if m else ("", "")
     c2d, r2d = ((m.group("c2") or ""), (m.group("r2") or "")) if m else ("", "")
     a = f"{sheet}{c1d}{get_column_letter(new_c1)}{r1d}{new_r1}"
-    if (new_r1, new_c1) != (new_r2, new_c2):
+    if force_range or (new_r1, new_c1) != (new_r2, new_c2):
         a += f":{c2d}{get_column_letter(new_c2)}{r2d}{new_r2}"
     return a
 
@@ -99,6 +110,15 @@ def top_level_operators(formula: str) -> list[tuple[int, str]]:
             out.append((i, ch))
         i += 1
     return out
+
+
+PARAMETER_WORDS = ("price", "rate", "factor", "%", "percent", "per ", "unit", "days", "hours", "weight",
+                   "multiplier", "fx", "exchange", "discount", "tax rate", "margin", "basis", "index")
+
+
+def is_parameter_label(label: str) -> bool:
+    low = label.lower()
+    return any(w in low for w in PARAMETER_WORDS)
 
 
 def is_pure_product(formula: str) -> bool:

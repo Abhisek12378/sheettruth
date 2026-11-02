@@ -189,19 +189,20 @@ def grid_lines(sheet: Sheet, row: int, col: int, radius: int) -> list[str]:
     return lines
 
 
+def blank_run_line(sheet_name: str, letter: str, blank_run: list[int]) -> list[str]:
+    """One collapsed line for a run of blank cells in a column, or nothing for an empty run."""
+    if len(blank_run) == 1:
+        return [f"COL|{sheet_name}!{letter}{blank_run[0]}|||(blank)"]
+    if blank_run:
+        return [f"COL|{sheet_name}!{letter}{blank_run[0]}:{letter}{blank_run[-1]}|||({len(blank_run)} blank cells)"]
+    return []
+
+
 def column_context_lines(sheet: Sheet, row: int, col: int, above: int, below: int, skip_rows: set[int]) -> list[str]:
     """Cells above and below the target in its column, with blank runs collapsed."""
     lines: list[str] = []
     blank_run: list[int] = []
     letter = get_column_letter(col)
-
-    def flush_blanks() -> None:
-        if len(blank_run) == 1:
-            lines.append(f"COL|{sheet.name}!{letter}{blank_run[0]}|||(blank)")
-        elif blank_run:
-            lines.append(f"COL|{sheet.name}!{letter}{blank_run[0]}:{letter}{blank_run[-1]}|||({len(blank_run)} blank cells)")
-        blank_run.clear()
-
     rows = list(range(max(1, row - above), row)) + list(range(row + 1, row + below + 1))
     for r in rows:
         if r in skip_rows:
@@ -210,9 +211,10 @@ def column_context_lines(sheet: Sheet, row: int, col: int, above: int, below: in
         if cell.is_blank:
             blank_run.append(r)
             continue
-        flush_blanks()
+        lines += blank_run_line(sheet.name, letter, blank_run)
+        blank_run = []
         lines.append(cell_record("COL", sheet, cell, row_label(sheet, r, col)))
-    flush_blanks()
+    lines += blank_run_line(sheet.name, letter, blank_run)
     return lines
 
 
@@ -228,24 +230,25 @@ def row_context_lines(sheet: Sheet, row: int, col: int, left: int, right: int, s
     return lines
 
 
+def axis_peer_lines(sheet: Sheet, axis: str, positions: list[tuple[int, int]], r1c1: str, max_diff: int) -> list[str]:
+    """Peer summary for one axis: how many formula cells share the target's R1C1, and the ones that differ."""
+    peers = [sheet.get(r, c) for (r, c) in positions]
+    peers = [p for p in peers if p.is_formula]
+    if not peers:
+        return [f"PEERS_{axis}|none"]
+    same = [p for p in peers if to_r1c1(p.formula, p.row, p.col) == r1c1]
+    lines = [f"PEERS_{axis}|formula_cells={len(peers)}|same_r1c1={len(same)}"]
+    for p in [p for p in peers if p not in same][:max_diff]:
+        lines.append(f"PEER_DIFF|{sheet.name}!{p.addr}|{esc(to_r1c1(p.formula, p.row, p.col))}|{fmt_formula(p)}|{fmt_val(p)}")
+    return lines
+
+
 def peer_lines(sheet: Sheet, target: Cell, r1c1: str, max_diff: int = 3) -> list[str]:
     """Formula cells in the same row and column: how many share the target's R1C1, and the ones that differ."""
-    axes = {
-        "ROW": [(target.row, c) for c in range(max(1, target.col - 8), target.col + 9) if c != target.col],
-        "COL": [(r, target.col) for r in range(max(1, target.row - 15), target.row + 16) if r != target.row],
-    }
-    lines = []
-    for axis, positions in axes.items():
-        peers = [sheet.get(r, c) for (r, c) in positions]
-        peers = [p for p in peers if p.is_formula]
-        if not peers:
-            lines.append(f"PEERS_{axis}|none")
-            continue
-        same = [p for p in peers if to_r1c1(p.formula, p.row, p.col) == r1c1]
-        lines.append(f"PEERS_{axis}|formula_cells={len(peers)}|same_r1c1={len(same)}")
-        for p in [p for p in peers if p not in same][:max_diff]:
-            lines.append(f"PEER_DIFF|{sheet.name}!{p.addr}|{esc(to_r1c1(p.formula, p.row, p.col))}|{fmt_formula(p)}|{fmt_val(p)}")
-    return lines
+    row_positions = [(target.row, c) for c in range(max(1, target.col - 8), target.col + 9) if c != target.col]
+    col_positions = [(r, target.col) for r in range(max(1, target.row - 15), target.row + 16) if r != target.row]
+    return (axis_peer_lines(sheet, "ROW", row_positions, r1c1, max_diff)
+            + axis_peer_lines(sheet, "COL", col_positions, r1c1, max_diff))
 
 
 def sign_summary(cells: list[Cell]) -> str:
@@ -290,28 +293,26 @@ class LinearRange:
         return self.along_rows and i in self.sheet.hidden_rows
 
 
-def range_anomaly_tags(rng: LinearRange, i: int, inside: set[tuple[int, int]], mostly_formulas: bool) -> list[str]:
-    """Why a cell inside a range deserves attention. Empty when it is an ordinary data cell."""
-    cell = rng.cell(i)
-    tags: list[str] = []
+def cell_kind_tags(rng: LinearRange, cell: Cell, inside: set[tuple[int, int]], mostly_formulas: bool) -> list[str]:
+    """Tags about what kind of cell sits inside the range: a subtotal of the range, a formula among
+    values, or a typed number among formulas."""
     if cell.is_formula:
         leaves = term_leaf_cells(cell.formula, rng.sheet.name)
         if leaves and any(s == rng.sheet.name and (r, c) in inside for (s, r, c) in leaves):
-            tags.append("sums_cells_inside_range")
-        elif not mostly_formulas:
-            tags.append("formula_among_values")
-    elif cell.is_number and mostly_formulas:
-        tags.append("hardcoded_among_formulas")
-    if has_total_word(rng.label(i)):
-        tags.append("total_word")
-    if cell.bold:
-        tags.append("bold")
-    if cell.is_blank:
-        tags.append("blank")
-    if rng.is_hidden(i):
-        tags.append("hidden")
-    if cell.is_number and cell.value < 0:
-        tags.append("negative")
+            return ["sums_cells_inside_range"]
+        return [] if mostly_formulas else ["formula_among_values"]
+    if cell.is_number and mostly_formulas:
+        return ["hardcoded_among_formulas"]
+    return []
+
+
+def range_anomaly_tags(rng: LinearRange, i: int, inside: set[tuple[int, int]], mostly_formulas: bool) -> list[str]:
+    """Why a cell inside a range deserves attention. Empty when it is an ordinary data cell."""
+    cell = rng.cell(i)
+    tags = cell_kind_tags(rng, cell, inside, mostly_formulas)
+    flags = (("total_word", has_total_word(rng.label(i))), ("bold", cell.bold), ("blank", cell.is_blank),
+             ("hidden", rng.is_hidden(i)), ("negative", cell.is_number and cell.value < 0))
+    tags.extend(name for name, on in flags if on)
     return tags
 
 
@@ -378,11 +379,24 @@ def two_d_range_lines(sheet: Sheet, ref: Ref) -> list[str]:
     return lines
 
 
+def collapsed_range_lines(sheet: Sheet, ref: Ref, cfg: WindowConfig, target: Cell, target_sheet: str) -> list[str]:
+    """A one-cell range written as F25:F25. Its direction is unknown, so both the cells above and
+    below and the cells left and right are shown, the way a real range's boundaries would be."""
+    cell = sheet.get(ref.r1, ref.c1)
+    lines = [f"REF_RANGE|{sheet.name}!{esc(ref.text)}|cells=1|written_as_range|{sign_summary([cell])}",
+             cell_record("IN_RANGE", sheet, cell, row_label(sheet, ref.r1, ref.c1))]
+    for along_rows in (True, False):
+        lines.extend(boundary_lines(LinearRange(sheet, ref, along_rows), cfg, target, target_sheet))
+    return lines
+
+
 def reference_lines(wb: Workbook, ref: Ref, cfg: WindowConfig, target: Cell, target_sheet: str) -> list[str]:
     """Everything the window says about one reference in the target formula."""
     sheet = wb.sheet(ref.sheet)
     if sheet is None:
         return [f"REF|{esc(ref.text)}|unresolved_sheet"]
+    if ref.written_as_range:
+        return collapsed_range_lines(sheet, ref, cfg, target, target_sheet)
     if not ref.is_range:
         return [single_ref_line(sheet, ref)]
     cells = [sheet.get(r, c) for (r, c) in ref.cells()]
@@ -414,6 +428,10 @@ def overlap_lines(ctx: CellContext, max_cells: int = 6) -> list[str]:
     return lines
 
 
+def _reference_count(candidate: tuple) -> int:
+    return candidate[0]
+
+
 def assumption_lines(wb: Workbook, sheet: Sheet, cfg: WindowConfig, exclude: set[tuple[int, int]]) -> list[str]:
     """Labelled constants on the sheet that two or more formulas reference absolutely."""
     counts = wb.reference_counts().get(sheet.name, {})
@@ -425,7 +443,7 @@ def assumption_lines(wb: Workbook, sheet: Sheet, cfg: WindowConfig, exclude: set
         label = row_label(sheet, r, c) or col_header(sheet, r, c)
         if label:
             candidates.append((n, cell, label))
-    candidates.sort(key=lambda item: -item[0])
+    candidates.sort(key=_reference_count, reverse=True)
     return [f"ASSUMPTION|{sheet.name}!{cell.addr}|{esc(label)}|{fmt_val(cell)}|used_by={n}|fmt={cell.number_format}"
             for n, cell, label in candidates[: cfg.max_assumptions]]
 

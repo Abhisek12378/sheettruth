@@ -43,8 +43,9 @@ def ctx_for(tmp_path, rows, addr, name="t.xlsx"):
     return build_context(wb, "Sheet1", addr)
 
 
-def test_registry_has_five():
-    assert set(registry()) == {"skipped_rows", "wrong_function", "wrong_sign", "missing_factor", "double_count"}
+def test_registry_has_every_mutator():
+    assert set(registry()) == {"skipped_rows", "extra_rows", "wrong_function", "wrong_sign", "missing_factor",
+                               "double_count", "wrong_reference", "missing_term", "wrong_operator"}
 
 
 def test_skipped_rows_fires_and_drops_real_rows(tmp_path):
@@ -148,3 +149,78 @@ def test_window_builds_for_every_mutated_case(tmp_path):
     assert "TARGET|Sheet1!B8|=SUM(B3:B7)" in w.text
     assert "ROW_PATH|Total expenses" in w.text
     assert w.tokens < 1500
+
+
+def test_skipped_rows_can_collapse_to_one_cell_written_as_range(tmp_path):
+    m = registry()["skipped_rows"]
+    ctx = ctx_for(tmp_path, expense_block(), "B8")
+    seen = {m.mutate(ctx, random.Random(seed)).broken_formula for seed in range(40)}
+    assert any(":" in f and f.count(":") == 1 and f[5:].split(":")[0] == f[5:].split(":")[1].rstrip(")") for f in seen)
+
+
+def test_extra_rows_reaches_into_price_row(tmp_path):
+    m = registry()["extra_rows"]
+    rows = {"A1": "Price", "B1": 0.115, "A2": "Jan", "B2": 500, "A3": "Feb", "B3": 520, "A4": "Mar", "B4": 530,
+            "A5": "Total", "B5": "=SUM(B2:B4)"}
+    ctx = ctx_for(tmp_path, rows, "B5")
+    assert m.applies(ctx)
+    mut = m.mutate(ctx, RNG)
+    assert mut.broken_formula == "=SUM(B1:B4)" and "Price" in mut.reason_template
+
+
+def test_extra_rows_not_when_neighbour_is_ordinary(tmp_path):
+    m = registry()["extra_rows"]
+    rows = {"A1": "Dec", "B1": 480, "A2": "Jan", "B2": 500, "A3": "Feb", "B3": 520, "A4": "Mar", "B4": 530,
+            "A5": "Total", "B5": "=SUM(B2:B4)"}
+    assert not m.applies(ctx_for(tmp_path, rows, "B5"))
+
+
+def row_table():
+    return {"A1": "Item", "B1": "Qty", "C1": "Price", "D1": "Amount",
+            "A2": "x", "B2": 2, "C2": 10, "D2": "=B2*C2", "A3": "y", "B3": 3, "C3": 11, "D3": "=B3*C3",
+            "A4": "z", "B4": 4, "C4": 12, "D4": "=B4*C4"}
+
+
+def test_wrong_reference_shifts_one_row(tmp_path):
+    m = registry()["wrong_reference"]
+    ctx = ctx_for(tmp_path, row_table(), "D3")
+    assert m.applies(ctx)
+    mut = m.mutate(ctx, RNG)
+    assert mut.broken_formula != "=B3*C3" and mut.expected_formula == "=B3*C3"
+    assert "D3" not in mut.broken_formula
+
+
+def test_wrong_reference_not_on_anchored_rows(tmp_path):
+    m = registry()["wrong_reference"]
+    rows = {"A1": "Rate", "B1": 0.1, "A2": "Base", "B2": 100, "A3": "Fee", "B3": "=B$2*B$1"}
+    assert not m.applies(ctx_for(tmp_path, rows, "B3"))
+
+
+def test_missing_term_drops_a_labelled_term(tmp_path):
+    m = registry()["missing_term"]
+    rows = {"A1": "Revenue", "B1": 100, "A2": "Other income", "B2": 20, "A3": "Interest", "B3": 5,
+            "A4": "Costs", "B4": 40, "A5": "Net", "B5": "=B1+B2+B3-B4"}
+    ctx = ctx_for(tmp_path, rows, "B5")
+    assert m.applies(ctx)
+    mut = m.mutate(ctx, RNG)
+    assert mut.broken_formula.count("B") == 3 and "left out" in mut.reason_template
+
+
+def test_missing_term_not_on_two_terms(tmp_path):
+    m = registry()["missing_term"]
+    rows = {"A1": "Revenue", "B1": 100, "A2": "Costs", "B2": 40, "A3": "Net", "B3": "=B1-B2"}
+    assert not m.applies(ctx_for(tmp_path, rows, "B3"))
+
+
+def test_wrong_operator_drops_parentheses(tmp_path):
+    m = registry()["wrong_operator"]
+    rows = {"A1": "This year", "B1": 120, "A2": "Last year", "B2": 100, "A3": "Growth %", "B3": "=(B1-B2)/B2"}
+    ctx = ctx_for(tmp_path, rows, "B3")
+    assert m.applies(ctx)
+    assert m.mutate(ctx, RNG).broken_formula == "=B1-B2/B2"
+
+
+def test_wrong_operator_turns_product_into_division(tmp_path):
+    m = registry()["wrong_operator"]
+    ctx = ctx_for(tmp_path, row_table(), "D3")
+    assert m.mutate(ctx, RNG).broken_formula == "=B3/C3"

@@ -38,9 +38,13 @@ class DoubleCount(Mutator):
                 out.append((cell, lab))
         return out
 
-    def _subtotal_after(self, ref, sh):
+    def _subtotal_after(self, ref, sh, target=None):
+        """The cell just past the range end, if it is a formula summing cells inside the range.
+        The target cell itself never qualifies: extending onto it would create a circular reference."""
         r, c = (ref.r2 + 1, ref.c1) if ref.is_vertical else (ref.r1, ref.c2 + 1)
         cell = sh.get(r, c)
+        if target is not None and (r, c) == (target.row, target.col):
+            return None
         if not cell.is_formula:
             return None
         leaf = term_leaf_cells(cell.formula, sh.name)
@@ -54,7 +58,7 @@ class DoubleCount(Mutator):
         if not cand:
             return False
         ref, sh = cand
-        return bool(self._inside_with_label(ref, sh)) or self._subtotal_after(ref, sh) is not None
+        return bool(self._inside_with_label(ref, sh)) or self._subtotal_after(ref, sh, ctx.cell) is not None
 
     def mutate(self, ctx: CellContext, rng):
         cand = self._candidate(ctx)
@@ -62,7 +66,7 @@ class DoubleCount(Mutator):
             return None
         ref, sh = cand
         f = ctx.cell.formula
-        sub = self._subtotal_after(ref, sh)
+        sub = self._subtotal_after(ref, sh, ctx.cell)
         inside = self._inside_with_label(ref, sh)
         use_b = sub is not None and (not inside or rng.random() < 0.5)
         if use_b:

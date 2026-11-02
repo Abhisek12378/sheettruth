@@ -13,8 +13,9 @@ One target cell per model call. Same builder for training and inference. Target 
 | REF_RANGE / IN_RANGE / IN_RANGE_NOTE | per range: sign summary, head 3, tail 5, anomalies inside (minority cell kind, total words, bold, hidden, negatives), omitted count | this is where skipped rows, double counts and sign errors show |
 | BEFORE_RANGE / AFTER_RANGE | 5 cells past each end with labels | omitted adjacent cells, blank-separator cases |
 | REF_CELL | each single referenced cell with label, header, formula, value | missing factor, wrong reference |
+| REF_RANGE written_as_range | a one-cell range such as F25:F25, shown with the cells on all four sides | a range collapsed to one cell |
 | OVERLAP | leaf cells counted twice across additive terms, computed by code | double counting is arithmetic; code does it exactly |
-| ASSUMPTION | up to 10 constants referenced with fully absolute refs ($B$2) by 2+ formulas | the missing multiplier is usually one of these |
+| ASSUMPTION | up to 10 constants referenced with a row-anchored ref ($B$2 or B$2) by 2+ formulas | the missing multiplier is usually one of these |
 
 Rules: windows for error examples are built from the corrupted, recalculated copy only; if the
 window cannot fit the formula plus minimum evidence in the cap, the example is `unsupported: truncated_evidence`.

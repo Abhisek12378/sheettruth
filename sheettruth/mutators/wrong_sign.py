@@ -17,6 +17,8 @@ class WrongSign(Mutator):
 
     def _options(self, ctx: CellContext):
         f = ctx.cell.formula
+        if len(parse_refs(f, ctx.sheet.name)) < 2:
+            return []
         ops = [(i, o) for i, o in top_level_operators(f) if o in "+-"]
         out = []
         for i, o in ops:

@@ -85,7 +85,7 @@ class Sheet:
         return (c for c in self.cells.values() if c.is_formula)
 
 
-FULLY_ABSOLUTE_REF = re.compile(r"\$[A-Za-z]{1,3}\$\d")
+ROW_ANCHORED_REF = re.compile(r"\$?[A-Za-z]{1,3}\$\d")   # $C$8 or C$8: parameters live in anchored rows
 MAX_RANGE_FOR_REFERENCE_INDEX = 50
 
 
@@ -150,10 +150,11 @@ class Workbook:
         self.strip_formula_values = strip_formula_values
         wb_formulas = openpyxl.load_workbook(path, data_only=False)
         wb_values = openpyxl.load_workbook(path, data_only=True)
-        self.sheetnames = list(wb_formulas.sheetnames)
+        # chart sheets have no cells; only real worksheets are loaded
+        worksheets = [ws for ws in wb_formulas.worksheets]
+        self.sheetnames = [ws.title for ws in worksheets]
         self.sheets: dict[str, Sheet] = {
-            name: _load_sheet(wb_formulas[name], wb_values[name], strip_formula_values)
-            for name in self.sheetnames
+            ws.title: _load_sheet(ws, wb_values[ws.title], strip_formula_values) for ws in worksheets
         }
         self._ref_index: Optional[dict[str, dict[tuple[int, int], int]]] = None
 
@@ -165,10 +166,10 @@ class Workbook:
         return self.sheets.get(by_norm.get(_normalise_sheet_name(name), ""))
 
     def reference_counts(self) -> dict[str, dict[tuple[int, int], int]]:
-        """How many formulas reference each cell through a fully absolute ($B$2) reference, per sheet.
+        """How many formulas reference each cell through a row-anchored ($B$2 or B$2) reference, per sheet.
 
-        Only fully absolute references count. Assumptions such as rates and factors are almost
-        always referenced that way, while table inputs are referenced relatively.
+        Assumptions such as rates and factors are almost always referenced with the row anchored,
+        while table inputs are referenced relatively or with only the column anchored ($B10).
         """
         if self._ref_index is not None:
             return self._ref_index
@@ -178,7 +179,7 @@ class Workbook:
                 for ref in parse_refs(cell.formula, sheet.name):
                     if ref.size() > MAX_RANGE_FOR_REFERENCE_INDEX or ref.sheet not in index:
                         continue
-                    if not FULLY_ABSOLUTE_REF.search(ref.text):
+                    if not ROW_ANCHORED_REF.search(ref.text):
                         continue
                     for key in ref.cells():
                         index[ref.sheet][key] = index[ref.sheet].get(key, 0) + 1
@@ -200,6 +201,11 @@ class Ref:
     @property
     def is_range(self) -> bool:
         return (self.r1, self.c1) != (self.r2, self.c2)
+
+    @property
+    def written_as_range(self) -> bool:
+        """True for a one-cell range written with a colon (F25:F25), a sign of a collapsed range."""
+        return not self.is_range and ":" in self.text
 
     @property
     def is_vertical(self) -> bool:
@@ -259,6 +265,23 @@ def parse_refs(formula: str, default_sheet: str) -> list[Ref]:
     return out
 
 
+def _r1c1_corner(col_text: str, row_text: str, row: int, col: int) -> str:
+    """One A1 corner such as $B10 in R1C1 form relative to (row, col); anchored parts stay absolute."""
+    c = column_index_from_string(col_text.replace("$", "").upper())
+    r = int(row_text.replace("$", ""))
+    rc = f"R{r}" if row_text.startswith("$") else (f"R[{r - row}]" if r != row else "R")
+    cc = f"C{c}" if col_text.startswith("$") else (f"C[{c - col}]" if c != col else "C")
+    return rc + cc
+
+
+def _r1c1_reference(m: "re.Match", row: int, col: int) -> str:
+    prefix = (m.group("sheet") + "!") if m.group("sheet") else ""
+    text = prefix + _r1c1_corner(m.group("c1"), m.group("r1"), row, col)
+    if m.group("c2"):
+        text += ":" + _r1c1_corner(m.group("c2"), m.group("r2"), row, col)
+    return text
+
+
 def to_r1c1(formula: str, row: int, col: int) -> str:
     """Relative R1C1 form of an A1 formula, anchored at (row, col). Absolute parts stay absolute."""
     try:
@@ -267,22 +290,8 @@ def to_r1c1(formula: str, row: int, col: int) -> str:
         return formula
     parts = ["="]
     for t in toks:
-        if t.type == "OPERAND" and t.subtype == "RANGE":
-            m = _REF_RE.match(t.value)
-            if m:
-                prefix = (m.group("sheet") + "!") if m.group("sheet") else ""
-                def one(cs, rs):
-                    c = column_index_from_string(cs.replace("$", "").upper())
-                    r = int(rs.replace("$", ""))
-                    rc = f"R{r}" if rs.startswith("$") else (f"R[{r - row}]" if r != row else "R")
-                    cc = f"C{c}" if cs.startswith("$") else (f"C[{c - col}]" if c != col else "C")
-                    return rc + cc
-                s = prefix + one(m.group("c1"), m.group("r1"))
-                if m.group("c2"):
-                    s += ":" + one(m.group("c2"), m.group("r2"))
-                parts.append(s)
-                continue
-        parts.append(t.value)
+        m = _REF_RE.match(t.value) if t.type == "OPERAND" and t.subtype == "RANGE" else None
+        parts.append(_r1c1_reference(m, row, col) if m else t.value)
     return "".join(parts)
 
 

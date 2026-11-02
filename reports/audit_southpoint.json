@@ -1,0 +1,64 @@
+{
+ "workbook": "data\\test\\enron_errors_xlsx\\2\\1_Southpoint Gas Model.xlsx",
+ "threshold": 0.5,
+ "findings": [
+  {
+   "sheet": "Sheet1",
+   "addr": "I34",
+   "run_cells": [
+    "I34"
+   ],
+   "formula": "=SUM(I9:I33)",
+   "type": "skipped_rows",
+   "expected": "=SUM(I8:I33)",
+   "reason": "The SUM range stops short: he 6 belong to the same block but are left out.",
+   "p_error": 0.97965,
+   "verification": {
+    "outcome": "passed",
+    "old_value": 79625,
+    "new_value": null,
+    "checks": [
+     {
+      "name": "recalculated_fix",
+      "result": "skipped",
+      "detail": "LibreOffice not available"
+     },
+     {
+      "name": "value_change",
+      "result": "skipped",
+      "detail": "no recalculated value"
+     },
+     {
+      "name": "peer_pattern",
+      "result": "skipped",
+      "detail": "neighbours do not share one formula shape"
+     },
+     {
+      "name": "range_delta",
+      "result": "supports",
+      "detail": "the fix adds 1 real values (1 labelled) such as I8=3430"
+     },
+     {
+      "name": "double_count",
+      "result": "skipped",
+      "detail": "not a double-count finding"
+     },
+     {
+      "name": "value_plausibility",
+      "result": "skipped",
+      "detail": "not enough numeric peers or no recalculated value"
+     }
+    ]
+   }
+  }
+ ],
+ "structure": [],
+ "notes": [
+  "loaded 1_Southpoint Gas Model.xlsx: sheets Sheet1, Sheet2, Sheet3",
+  "structure checks: 0 findings",
+  "windows: 3 runs covering 26 formula cells, 0 cells out of scope",
+  "model verdicts: 3",
+  "flagged at P(error) >= 0.5: 1",
+  "verify agent: {'passed': 1, 'failed': 0, 'no_independent_check': 0}"
+ ]
+}

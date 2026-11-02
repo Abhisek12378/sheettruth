@@ -34,11 +34,16 @@ mutators:
   # order matters: rarest first. A rare mutator wins whenever it applies.
   enabled:
     - missing_factor
+    - wrong_operator
+    - missing_term
+    - extra_rows
+    - wrong_reference
     - skipped_rows
     - double_count
     - wrong_function
     - wrong_sign
   per_type_target: 1200
+  block_wide_probability: 0.5   # write the broken formula into the whole run of identical formulas
 
 window:
   grid_radius: 2                # 5x5 grid around the target
