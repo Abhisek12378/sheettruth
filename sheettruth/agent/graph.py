@@ -2,12 +2,19 @@
 
     load_workbook -> structure_checks -> build_windows -> score_windows -> select_findings
         -> (nothing flagged) -> write_report
-        -> (findings)        -> verify_findings -> write_report
+        -> (findings)        -> verify_findings -> second_opinion -> write_report
 
 Each node is a plain function over the shared AuditState. The model is reached through a
-ModelClient, the verify agent through a Verifier, so the same graph runs against the deployed
-model, against saved verdicts, with or without LibreOffice. The `notes` list is the run log the
-report and the web page show.
+ModelClient, the verify agent through a Verifier, the second opinion through a ReviewerClient, so
+the same graph runs against the deployed model, against saved verdicts, with or without
+LibreOffice, with or without a reviewer. The `notes` list is the run log the report and the web
+page show.
+
+Final status of a finding:
+  contradicted   a code check speaks against it
+  disputed       no code check speaks against it, but the reviewer calls it not an error
+  confirmed      a code check supports it, or the reviewer calls it a real error
+  unverified     nothing could be tested and the reviewer could not tell
 """
 from __future__ import annotations
 
@@ -18,6 +25,7 @@ from langgraph.graph import END, START, StateGraph
 
 from sheettruth.agent.model_client import ModelClient, window_key
 from sheettruth.agent.report import render_markdown, write_outputs
+from sheettruth.agent.reviewer import NoReviewer, ReviewerClient
 from sheettruth.shape import shape_findings
 from sheettruth.verify import Finding, Verifier
 from sheettruth.windows.cellinfo import Workbook
@@ -42,9 +50,10 @@ class AuditState(TypedDict, total=False):
 class AuditGraph:
     """Builds and runs the audit workflow for one workbook."""
 
-    def __init__(self, model: ModelClient, verifier: Verifier):
+    def __init__(self, model: ModelClient, verifier: Verifier, reviewer: Optional[ReviewerClient] = None):
         self.model = model
         self.verifier = verifier
+        self.reviewer = reviewer or NoReviewer()
         self.graph = self._build()
 
     # -- nodes ------------------------------------------------------------------------------
@@ -91,6 +100,18 @@ class AuditGraph:
                     for k in ("passed", "failed", "no_independent_check")}
         return {"findings": findings, "notes": state["notes"] + [f"verify agent: {outcomes}"]}
 
+    def second_opinion(self, state: AuditState) -> AuditState:
+        """Findings not contradicted by code go to the reviewer; every finding gets a final status."""
+        findings = state["findings"]
+        to_review = [f for f in findings if f["verification"]["outcome"] != "failed"]
+        reviews = self.reviewer.review(to_review)
+        for finding, review in zip(to_review, reviews):
+            finding["review"] = review.to_dict()
+        for finding in findings:
+            finding["status"] = final_status(finding)
+        statuses = {k: sum(1 for f in findings if f["status"] == k) for k in ("confirmed", "unverified", "disputed", "contradicted")}
+        return {"findings": findings, "notes": state["notes"] + [f"second opinion on {len(to_review)}; status {statuses}"]}
+
     def write_report(self, state: AuditState) -> AuditState:
         findings = state.get("findings", [])
         n_cells = sum(len(r["run_cells"]) for r in state["records"])
@@ -112,7 +133,7 @@ class AuditGraph:
     def _build(self):
         g = StateGraph(AuditState)
         for name in ("load_workbook", "structure_checks", "build_windows", "score_windows", "select_findings",
-                     "verify_findings", "write_report"):
+                     "verify_findings", "second_opinion", "write_report"):
             g.add_node(name, getattr(self, name))
         g.add_edge(START, "load_workbook")
         g.add_edge("load_workbook", "structure_checks")
@@ -120,7 +141,8 @@ class AuditGraph:
         g.add_edge("build_windows", "score_windows")
         g.add_edge("score_windows", "select_findings")
         g.add_conditional_edges("select_findings", self._after_select, ["verify_findings", "write_report"])
-        g.add_edge("verify_findings", "write_report")
+        g.add_edge("verify_findings", "second_opinion")
+        g.add_edge("second_opinion", "write_report")
         g.add_edge("write_report", END)
         return g.compile()
 
@@ -132,8 +154,20 @@ class AuditGraph:
 
 def _candidate(record: dict, verdict: dict) -> dict:
     return {"sheet": record["sheet"], "addr": record["addr"], "run_cells": record["run_cells"],
-            "formula": record["formula"], "type": verdict.get("type"), "expected": verdict.get("expected"),
-            "reason": verdict.get("reason", ""), "p_error": verdict.get("p_error", 0.0)}
+            "formula": record["formula"], "window": record["window"], "type": verdict.get("type"),
+            "expected": verdict.get("expected"), "reason": verdict.get("reason", ""), "p_error": verdict.get("p_error", 0.0)}
+
+
+def final_status(finding: dict) -> str:
+    outcome = finding["verification"]["outcome"]
+    review = finding.get("review", {}).get("verdict", "cannot_tell")
+    if outcome == "failed":
+        return "contradicted"
+    if review == "not_error":
+        return "disputed"
+    if outcome == "passed" or review == "real_error":
+        return "confirmed"
+    return "unverified"
 
 
 def _error_probability(candidate: dict) -> float:

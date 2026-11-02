@@ -9,11 +9,11 @@
 | unsupported | 0 |
 | not_covered | 3 |
 | windows | 2817 |
-| flagged_windows | 159 |
-| false_alarm_windows | 142 |
+| flagged_windows | 158 |
+| false_alarm_windows | 141 |
 | recall_covered | 0.517 |
 | recall_all | 0.469 |
-| precision_windows | 0.107 |
+| precision_windows | 0.108 |
 
 ## Documented errors
 
@@ -50,7 +50,7 @@
 | 33 | 28 | sheet1 | I25, I26, I27, I28, I29, I30, I31 | Wrong reference | found | wrong_reference | yes | "he22" (G24) is used where "he23" (G25) belongs. |
 | 34 | 28 | sheet1 | G33, I34 | Range error | found | skipped_rows |  | The SUM range stops short: he 6 belong to the same block but are left out. |
 | 35 | 29 | sheet1 | F8 | Formula: = SUM(D8*E8) | missed |  |  |  |
-| 36 | 30 | hotlist - identified | M22, M37 | Range error | found | skipped_rows |  | The SUM range stops short: M&G - UK, M&G - UK, M&G - UK, M&G - UK, M&G - UK, M&G - UK, M&G - UK, M&G - UK belong to the same block but are left out. |
+| 36 | 30 | hotlist - identified | M22, M37 | Range error | found | skipped_rows |  | The SUM range stops short: Idaho Power, Harvard Fund belong to the same block but are left out. |
 
 ## By category
 
@@ -64,12 +64,13 @@
 | Wrong formula | 1 | 0 | 0 | 0 |
 | Wrong reference | 2 | 1 | 0 | 0 |
 
-## False alarms (142)
+## False alarms (141)
 
 | id | formula | type | reason |
 |---|---|---|---|
 | 6:Real Time!J26 | `=J23+J15` | wrong_reference | "Sr. Specialist" (J15) is used where "Sr. Manager" (J12) belongs. |
 | 6:Real Time!L122 | `=SUM(L118:L120)` | skipped_rows | The SUM range stops short: Billable Expense Clearing belong to the same block but are left out. |
+| 6:Real Time!N122 | `=SUM(N118:N121)` | extra_rows | The Total Other Expenses range runs one row too far and picks up Billable Expense Clearing (N121), which is not an Other Expense line. |
 | 6:Real Time!V122 | `=SUM(V118:V121)` | skipped_rows | The SUM range stops short: Corporate Rent (EPSC charges) belong to the same block but are left out. |
 | 7:Preschedule!Z59 | `=SUM(Economics!D28:D45)` | skipped_rows | The SUM range stops short: Total belong to the same block but are left out. |
 | 7:Preschedule!Z91 | `=Z89-Z90` | wrong_sign | "Total Costs:" (Z89) is subtracted here but should be added. |
@@ -93,7 +94,6 @@
 | 7:Deals!AD15 | `=SUM(F15:AC15)` | skipped_rows | The SUM range stops short: belong to the same block but are left out. |
 | 7:Deals!F169 | `=D170-0.25` | wrong_reference | "D170" (D170) is used where "D169" (D169) belongs. |
 | 7:Deals!AE142 | `=SUM(AE121:AE131)` | extra_rows | The 'Total per Model' subtotal for the EPE Purch from EPMI block should cover only rows 129-131, as its peer AD142 does, but the range is stretched up to row 121 and pulls in the PV rows that already belong to the main total in AE141. |
-| 7:Fuel!C7 | `=J49` | wrong_reference | "Variable Price" (J49) is used where "Fixed Price" (J48) belongs. |
 | 7:Fuel!C8 | `=J49` | wrong_reference | The 'Interstate Fixed Price (NM)' cell should pull the San Juan fixed price from J50, but it points one row up to J49, which is the Rio Grande fixed price already used by the 'Interstate Fixed Price (RG)' cell above. |
 | 9:Feb01!Q34 | `=+B36` | wrong_reference | "B36" (B36) is used where "B35" (B35) belongs. |
 | 9:Mar01!Y34 | `=+B36` | wrong_reference | "B36" (B36) is used where "B34" (B34) belongs. |
@@ -113,7 +113,6 @@
 | 20:Sheet1!M149 | `=SUM(K129:K146)+M112` | skipped_rows | The SUM range stops short: TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL, TOTAL belong to the same block but are left out. |
 | 20:unvested!E4 | `=SUM(C25:C25)+C33` | skipped_rows | The SUM range stops short: options, options, options, options, options, restricted stock belong to the same block but are left out. |
 | 21:Sheet1!F92 | `=SUM(E86:E91)` | skipped_rows | The SUM range stops short: , , , , ,  belong to the same block but are left out. |
-| 21:Sheet1!E116 | `=D116` | missing_factor | The column header says 'Split Retro-active Amount 50/50', so the amount should be halved, but the formula returns the full 'Amt in Dispute' from D116, unlike the peer rows that divide by 2. |
 | 21:Sheet1!E118 | `=D118` | missing_factor | The 'Split Retro-active Amount 50/50' column should halve the 'Amt in Dispute' amount, but this cell copies D118 without dividing by 2, unlike the peer row E114 (=D114/2). |
 | 21:Sheet1 (2)!E105 | `=+E103+E92` | wrong_reference | "(Retro billed March 20, 2001)" (E92) is used where "E93" (E93) belongs. |
 | 23:INCOME STATEMENT!C29 | `=SUM(C7:C27)` | skipped_rows | The SUM range stops short: 'ENA IS'!C21 belong to the same block but are left out. |

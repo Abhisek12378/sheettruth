@@ -9,9 +9,9 @@ against the workbook itself before it reports it.
 ## How it works
 
 ```
-workbook ──> structure checks ──> context windows ──> meaning model ──> verify agent ──> report
-             (rules, no model)    (one per run of      (fine-tuned,      (recalculation and
-                                   identical formulas)  one cell a call)  tie-out checks)
+workbook ──> structure checks ──> context windows ──> meaning model ──> verify agent ──> second opinion ──> report
+             (rules, no model)    (one per run of      (fine-tuned,      (recalculation and   (reviewer model,
+                                   identical formulas)  one cell a call)  tie-out checks)      optional)
 ```
 
 1. **Structure checks** (`sheettruth/shape.py`). Rules that need no model: a number typed over a
@@ -33,10 +33,16 @@ workbook ──> structure checks ──> context windows ──> meaning model 
    `sheettruth/agent/graph.py`). Every flagged cell is tested without trusting the model's reason:
    the proposed fix is written into a copy and recalculated with LibreOffice; the fix is compared
    with the formula pattern of neighbouring cells and of the same cell on sibling sheets; the
-   cells a range fix adds or drops are inspected; double counting is checked in code; the fixed
-   value is compared with peer values. Outcome per finding: `passed`, `failed` or
-   `no_independent_check`. Details: `docs/verify_agent.md`.
-5. **Report**. Markdown for people, JSON for software, through the CLI or the web page.
+   cells a range fix adds or drops are inspected; double counting is checked in code; a sign
+   finding on a lone negated reference is treated as a convention; the fixed value is compared
+   with peer values. Outcome per finding: `passed`, `failed` or `no_independent_check`. Details:
+   `docs/verify_agent.md`.
+5. **Second opinion** (`sheettruth/agent/reviewer.py`, optional). Findings not contradicted by
+   code can be sent to a hosted reviewer model with the same window and the claim; it answers
+   `real_error`, `not_error` or `cannot_tell` with one sentence. Each finding then carries a final
+   status: `confirmed`, `unverified`, `disputed` or `contradicted`. The reviewer is used when its
+   endpoint is configured through the environment.
+6. **Report**. Markdown for people, JSON for software, through the CLI or the web page.
 
 ## Training data
 
@@ -70,11 +76,19 @@ noticed, not every error in the files.
 |---|---|---|
 | first fine-tune (v1), greedy verdict | 6 | 71 |
 | second fine-tune (v2), P(error) >= 0.5 | 18 | 222 |
-| v2 + verify agent, contradicted findings dropped | 17 | 159 |
-| v2 + verify agent, only supported findings kept | 15 | 142 |
+| v2 + verify agent, contradicted findings dropped | 17 | 160 |
+| v2 + verify agent, only supported findings kept | 15 | 141 |
 
 Ten of the 18 finds come with the exact documented correction. Lowering the cutoff to 0.3 finds
 21 before verification at 395 flagged windows.
+
+**What the flagged cells outside the list are.** The corpus records the errors people noticed, not
+every error in the files. An independent reviewer model was given the 160 remaining flagged cells
+with the same context windows, plus 10 documented errors mixed in unmarked. It recognised 9 of the
+10 documented errors, and judged 59 of the 160 to be real errors (6 distinct issues; 45 of the 59
+are one omission repeated on 45 template sheets of one workbook), 67 not errors, and 33 not
+decidable from the window. The review pack and answers are reproducible with `scripts/` and
+`reports/`.
 
 Three of the 33 errors are not covered: one uses a custom add-in function, one uses ROUND, one is
 a value cell. Per-error tables, categories and the full false-alarm lists are in `reports/`.

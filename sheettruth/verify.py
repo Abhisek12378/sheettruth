@@ -15,6 +15,8 @@ Each check looks at the workbook itself:
                      looks foreign to the block. For a moved reference or an added term the added
                      cell holding a value is only a precondition, not evidence
   double_count       the current formula really counts a cell twice, or sums a subtotal of itself
+  sign_convention    a sign finding on a formula with a single reference (=-B7) is a convention
+                     the labels cannot settle, so it is contradicted
   value_plausibility after the fix, the target's value sits closer to its peers than before
 
 A finding passes when at least one check supports it, fails when checks only contradict it, and
@@ -237,6 +239,14 @@ class Verifier:
                 return Check("double_count", "supports", f"{cell.addr} inside the range is a subtotal of other cells in it")
         return Check("double_count", "contradicts", "no cell is counted twice by the current formula")
 
+    def check_sign_convention(self, sheet: Sheet, finding: Finding) -> Check:
+        if finding.type != "wrong_sign":
+            return Check("sign_convention", "skipped", "not a sign finding")
+        if len(parse_refs(finding.formula, sheet.name)) == 1:
+            return Check("sign_convention", "contradicts",
+                         "a lone negated reference expresses a sign convention; the labels cannot show it is wrong")
+        return Check("sign_convention", "skipped", "formula combines several references")
+
     def check_value_plausibility(self, sheet: Sheet, target: Cell, old_value, new_value) -> Check:
         peers = [p.value for p in _peers(sheet, target) if _is_number(p.value)]
         if new_value is None or len(peers) < MIN_PEERS or not _is_number(old_value) or not _is_number(new_value):
@@ -266,6 +276,7 @@ class Verifier:
             self.check_sibling_sheets(wb, sheet, target, finding),
             self.check_range_delta(wb, sheet, finding),
             self.check_double_count(sheet, finding),
+            self.check_sign_convention(sheet, finding),
             self.check_value_plausibility(sheet, target, target.value, new_value),
         ]
         return Verification(_outcome(checks), checks, target.value, new_value)

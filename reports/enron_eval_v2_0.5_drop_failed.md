@@ -10,10 +10,10 @@
 | not_covered | 3 |
 | windows | 2817 |
 | flagged_windows | 179 |
-| false_alarm_windows | 159 |
+| false_alarm_windows | 160 |
 | recall_covered | 0.586 |
 | recall_all | 0.531 |
-| precision_windows | 0.112 |
+| precision_windows | 0.106 |
 
 ## Documented errors
 
@@ -35,7 +35,7 @@
 | 14 | 13 | sheet1 | H33 | Wrong calculation | found | extra_rows |  | The range is stretched up past the blank separator row into the 'Total' subtotal of the government-ban costs, so those 875 are counted again in the unusual-items total. |
 | 15 | 13 | sheet1 | I35 | Wrong calculation | found | wrong_reference |  | "Total" (H33) is used where "Unusual loss from government ban of certain preservatives" (H32) belongs. |
 | 16 | 13 | sheet1 | I38 | Wrong calculation | missed |  |  |  |
-| 19 | 16 | sheet1 | B13, B25, B37, C13, C25, C37, D13, D25,  | Wrong calculation | found | wrong_operator |  | Parentheses are missing: "B36/C37" must be computed before subtracting B36. |
+| 19 | 16 | sheet1 | B13, B25, B37, C13, C25, C37, D13, D25,  | Wrong calculation | found | wrong_reference |  | "Fuel - %" (O25) is used where "IF Index" (O24) belongs. |
 | 22 | 18 | crack spread option | M10, M11, M12, M13, M14, M9 | Wrong calculation | not_covered |  |  |  |
 | 23 | 19 | may(2) | AE18, AE19, AE20, AE21, AE22, AE23, AE24 | Range error | missed |  |  |  |
 | 24 | 20 | sheet1 | D112 | Range error | missed |  |  |  |
@@ -64,7 +64,7 @@
 | Wrong formula | 1 | 0 | 0 | 0 |
 | Wrong reference | 3 | 0 | 0 | 0 |
 
-## False alarms (159)
+## False alarms (160)
 
 | id | formula | type | reason |
 |---|---|---|---|
@@ -73,6 +73,7 @@
 | 5:jul01!AS44 | `=AL44+AN44-AQ44` | wrong_sign | "TOTAL" (AQ44) is subtracted here but should be added. |
 | 6:Real Time!J26 | `=J23+J15` | wrong_reference | "Sr. Specialist" (J15) is used where "Sr. Manager" (J12) belongs. |
 | 6:Real Time!L122 | `=SUM(L118:L120)` | skipped_rows | The SUM range stops short: Billable Expense Clearing belong to the same block but are left out. |
+| 6:Real Time!N122 | `=SUM(N118:N121)` | extra_rows | The Total Other Expenses range runs one row too far and picks up Billable Expense Clearing (N121), which is not an Other Expense line. |
 | 6:Real Time!V122 | `=SUM(V118:V121)` | skipped_rows | The SUM range stops short: Corporate Rent (EPSC charges) belong to the same block but are left out. |
 | 7:Preschedule!Z59 | `=SUM(Economics!D28:D45)` | skipped_rows | The SUM range stops short: Total belong to the same block but are left out. |
 | 7:Preschedule!Z91 | `=Z89-Z90` | wrong_sign | "Total Costs:" (Z89) is subtracted here but should be added. |
@@ -122,7 +123,7 @@
 | 20:unvested!E4 | `=SUM(C25:C25)+C33` | skipped_rows | The SUM range stops short: options, options, options, options, options, restricted stock belong to the same block but are left out. |
 | 21:Sheet1!F92 | `=SUM(E86:E91)` | skipped_rows | The SUM range stops short: , , , , ,  belong to the same block but are left out. |
 | 21:Sheet1!H114 | `=D114-G114` | wrong_sign | "Nov, 1996 - Jan, 2001 Revenue" (G114) is subtracted here but should be added. |
-| 21:Sheet1!E116 | `=D116` | missing_factor | The column header says 'Split Retro-active Amount 50/50', so the amount should be halved, but the formula returns the full 'Amt in Dispute' from D116, unlike the peer rows that divide by 2. |
+| 21:Sheet1!F117 | `=D117` | missing_factor | The 'Split Retro-active Amount 50/50' column should halve the 'Amt in Dispute' amount, but this cell copies D117 in full, unlike the peer rows F115 and F116, which divide by 2. |
 | 21:Sheet1!E118 | `=D118` | missing_factor | The 'Split Retro-active Amount 50/50' column should halve the 'Amt in Dispute' amount, but this cell copies D118 without dividing by 2, unlike the peer row E114 (=D114/2). |
 | 21:Sheet1!E124 | `=E116` | missing_factor | The 'Split Retro-active Amount 50/50' label requires halving the revenue, but the formula returns the full Feb, 2001 - Oct, 2001 Revenue amount, unlike the peer row E114 which divides by 2. |
 | 21:Sheet1 (2)!E105 | `=+E103+E92` | wrong_reference | "(Retro billed March 20, 2001)" (E92) is used where "E93" (E93) belongs. |

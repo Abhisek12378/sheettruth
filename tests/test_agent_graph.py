@@ -47,3 +47,21 @@ def test_graph_skips_verify_when_nothing_flagged(tmp_path):
     state = AuditGraph(StubModel(), Verifier(None)).run(str(tmp_path / "clean.xlsx"), CONFIG, 0.5)
     assert state["findings"] == []
     assert not any(n.startswith("verify agent") for n in state["notes"])
+
+
+class StubReviewer:
+    """Calls every finding a real error, with a fixed reason."""
+
+    def review(self, items):
+        from sheettruth.agent.reviewer import Review
+        return [Review("real_error", "stub reviewer") for _ in items]
+
+
+def test_graph_records_reviewer_verdict_and_status(tmp_path):
+    rows = amount_table({"A14": "Total", "D14": "=SUM(D2:D10)"})
+    make_wb(tmp_path, rows, "book.xlsx")
+    state = AuditGraph(StubModel(), Verifier(None), StubReviewer()).run(str(tmp_path / "book.xlsx"), CONFIG, 0.5)
+    finding = state["findings"][0]
+    assert finding["review"] == {"verdict": "real_error", "reason": "stub reviewer"}
+    assert finding["status"] == "confirmed"
+    assert "reviewer" in state["report_markdown"]

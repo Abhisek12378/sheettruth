@@ -1,5 +1,5 @@
 {
- "workbook": "data\\test\\enron_errors_xlsx\\2\\1_Southpoint Gas Model.xlsx",
+ "workbook": "data/test/enron_errors_xlsx/2/1_Southpoint Gas Model.xlsx",
  "threshold": 0.5,
  "findings": [
   {
@@ -12,21 +12,21 @@
    "type": "skipped_rows",
    "expected": "=SUM(I8:I33)",
    "reason": "The SUM range stops short: he 6 belong to the same block but are left out.",
-   "p_error": 0.97965,
+   "p_error": 0.81456,
    "verification": {
     "outcome": "passed",
     "old_value": 79625,
-    "new_value": null,
+    "new_value": 83055,
     "checks": [
      {
       "name": "recalculated_fix",
-      "result": "skipped",
-      "detail": "LibreOffice not available"
+      "result": "neutral",
+      "detail": "the fix evaluates to 83055"
      },
      {
       "name": "value_change",
-      "result": "skipped",
-      "detail": "no recalculated value"
+      "result": "neutral",
+      "detail": "value changes from 79625 to 83055"
      },
      {
       "name": "peer_pattern",
@@ -46,19 +46,60 @@
      {
       "name": "value_plausibility",
       "result": "skipped",
+      "detail": "fix does not move the value much relative to peers"
+     }
+    ]
+   }
+  },
+  {
+   "sheet": "Sheet1",
+   "addr": "G33",
+   "run_cells": [
+    "G33"
+   ],
+   "formula": "=SUM(G8:G32)",
+   "type": "skipped_rows",
+   "expected": "=SUM(G8:G31)",
+   "reason": "The SUM range now includes \"he5\" (G31), a subtotal of cells already in the range.",
+   "p_error": 0.61236,
+   "verification": {
+    "outcome": "failed",
+    "old_value": 11865,
+    "new_value": 11865,
+    "checks": [
+     {
+      "name": "recalculated_fix",
+      "result": "neutral",
+      "detail": "the fix evaluates to 11865"
+     },
+     {
+      "name": "value_change",
+      "result": "contradicts",
+      "detail": "the fix does not change the cell's value"
+     },
+     {
+      "name": "peer_pattern",
+      "result": "skipped",
+      "detail": "only 0 neighbouring formulas"
+     },
+     {
+      "name": "range_delta",
+      "result": "skipped",
+      "detail": "the fix adds no cells"
+     },
+     {
+      "name": "double_count",
+      "result": "skipped",
+      "detail": "not a double-count finding"
+     },
+     {
+      "name": "value_plausibility",
+      "result": "skipped",
       "detail": "not enough numeric peers or no recalculated value"
      }
     ]
    }
   }
  ],
- "structure": [],
- "notes": [
-  "loaded 1_Southpoint Gas Model.xlsx: sheets Sheet1, Sheet2, Sheet3",
-  "structure checks: 0 findings",
-  "windows: 3 runs covering 26 formula cells, 0 cells out of scope",
-  "model verdicts: 3",
-  "flagged at P(error) >= 0.5: 1",
-  "verify agent: {'passed': 1, 'failed': 0, 'no_independent_check': 0}"
- ]
+ "structure": []
 }

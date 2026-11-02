@@ -7,6 +7,7 @@ LibreOffice and Modal credentials; audits run one at a time.
 Start:
   pip install fastapi uvicorn python-multipart markdown
   python -m modal deploy training/predict_glimmer_modal.py        (once)
+  set SHEETTRUTH_REVIEWER_BASE_URL, SHEETTRUTH_REVIEWER_MODEL, SHEETTRUTH_REVIEWER_API_KEY for the second opinion
   uvicorn app.server:app --host 0.0.0.0 --port 8000
 """
 from __future__ import annotations
@@ -29,6 +30,7 @@ sys.path.insert(0, str(ROOT))
 
 from sheettruth.agent.graph import AuditGraph  # noqa: E402
 from sheettruth.agent.model_client import ModalPredictorClient  # noqa: E402
+from sheettruth.agent.reviewer import HostedReviewer, NoReviewer  # noqa: E402
 from sheettruth.data.recalc import Recalculator  # noqa: E402
 from sheettruth.verify import Verifier  # noqa: E402
 
@@ -60,7 +62,9 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8"><title>SheetTruth</ti
 
 
 def build_graph() -> AuditGraph:
-    return AuditGraph(ModalPredictorClient(ADAPTER_DIR), Verifier(Recalculator(timeout=CONFIG["recalc"]["timeout_s"])))
+    reviewer = HostedReviewer()
+    return AuditGraph(ModalPredictorClient(ADAPTER_DIR), Verifier(Recalculator(timeout=CONFIG["recalc"]["timeout_s"])),
+                      reviewer if reviewer.configured else NoReviewer())
 
 
 GRAPH = build_graph()

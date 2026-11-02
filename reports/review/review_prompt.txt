@@ -1,0 +1,25 @@
+You are an experienced spreadsheet auditor. I will paste a file with 15 items. Each item is one formula cell from a real company workbook that an automated tool flagged as a possible error. For each item you get: the cell and its formula, the tool's claim (error type, proposed fix, confidence and reason), the outcome of an independent check, and a "context window", which is a plain-text description of the cell's surroundings that the tool itself saw.
+
+How to read the context window:
+- TARGET: the cell under review, its formula, its recalculated value, number format.
+- ROW_PATH / COL_PATH: the labels of the cell's row and column, nearest label first, then section headers.
+- GRID: the 5x5 block of cells around the target with row numbers and column letters; the target row is marked with *.
+- COL / ROW: cells above and below in the same column, and left and right in the same row, with their labels.
+- PEERS_ROW / PEERS_COL: how many formula cells in the same row or column share the target's formula pattern (R1C1 form); PEER_DIFF lists ones that differ.
+- REF_RANGE / IN_RANGE / BEFORE_RANGE / AFTER_RANGE: the cells the formula references, a few cells inside the range, and the cells just before and after the range ends.
+- REF_CELL: a single referenced cell with its labels and value.
+- ASSUMPTION: labelled constants on the sheet (rates, factors) that formulas reference.
+- A line ending in -> value shows a formula and its value.
+
+Your task, for each item: decide whether the formula as written is a mistake, judging from the labels and surroundings only, as a careful human reviewer would. Do not trust the tool's reason or the independent check; form your own view. If the window does not hold enough information, say so instead of guessing.
+
+Answer with one line per item, in this exact format and nothing else:
+
+item | verdict | confidence | reason
+
+where verdict is one of: real_error, not_error, cannot_tell; confidence is high, medium or low; reason is one short sentence naming the evidence (labels, neighbours, range ends) that decided it.
+
+Example line:
+007 | real_error | high | Peers in the column read B*C on their own row, but this cell multiplies the row above.
+
+Here is the file:

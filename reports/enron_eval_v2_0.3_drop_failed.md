@@ -9,11 +9,11 @@
 | unsupported | 0 |
 | not_covered | 3 |
 | windows | 2817 |
-| flagged_windows | 301 |
-| false_alarm_windows | 276 |
+| flagged_windows | 297 |
+| false_alarm_windows | 277 |
 | recall_covered | 0.621 |
 | recall_all | 0.562 |
-| precision_windows | 0.083 |
+| precision_windows | 0.067 |
 
 ## Documented errors
 
@@ -64,7 +64,7 @@
 | Wrong formula | 1 | 0 | 0 | 0 |
 | Wrong reference | 3 | 0 | 0 | 0 |
 
-## False alarms (276)
+## False alarms (277)
 
 | id | formula | type | reason |
 |---|---|---|---|
@@ -75,9 +75,11 @@
 | 6:Real Time!J26 | `=J23+J15` | wrong_reference | "Sr. Specialist" (J15) is used where "Sr. Manager" (J12) belongs. |
 | 6:Real Time!V26 | `=V23/12` | wrong_operator | The Jan salary is the 'Total Headcount.' annual total divided by 12, but the Feb-Dec total in V29 multiplies this by 11, so January is counted twice in the year. |
 | 6:Real Time!P31 | `=1427861+2017416` | missing_term | The 2002 Plan total should add the 2000 Estimated total (N31 =SUM(N26:N30)) to the two 2002 Plan components, but the 2000 Estimated term is dropped, so the result is far below the 2000 total in S31. |
+| 6:Real Time!Q31 | `=+N31-P31` | wrong_sign | "Total 2002 Salaries Post Merit" (N31) is subtracted here but should be added. |
 | 6:Real Time!L56 | `=+[1]Plan!M51` | wrong_reference | "Other Employee Expense" (M51) is used where "Other Employee Expense" (M56) belongs. |
 | 6:Real Time!P95 | `=SUM(P94:P94)` | skipped_rows | The SUM range stops short: Marketing: (use rate per Avg Commercial Employee) belong to the same block but are left out. |
 | 6:Real Time!L122 | `=SUM(L118:L120)` | skipped_rows | The SUM range stops short: Billable Expense Clearing belong to the same block but are left out. |
+| 6:Real Time!N122 | `=SUM(N118:N121)` | extra_rows | The Total Other Expenses range runs one row too far and picks up Billable Expense Clearing (N121), which is not an Other Expense line. |
 | 6:Real Time!V122 | `=SUM(V118:V121)` | skipped_rows | The SUM range stops short: Corporate Rent (EPSC charges) belong to the same block but are left out. |
 | 7:Preschedule!Z59 | `=SUM(Economics!D28:D45)` | skipped_rows | The SUM range stops short: Total belong to the same block but are left out. |
 | 7:Preschedule!Z91 | `=Z89-Z90` | wrong_sign | "Total Costs:" (Z89) is subtracted here but should be added. |
@@ -101,6 +103,7 @@
 | 7:Preschedule!Z163 | `=Z160-Z162` | wrong_sign | "Total Costs:" (Z160) is subtracted here but should be added. |
 | 7:Deals!AD15 | `=SUM(F15:AC15)` | skipped_rows | The SUM range stops short: belong to the same block but are left out. |
 | 7:Deals!AD120 | `=SUM(F120:AC120)` | skipped_rows | The SUM range stops short: belong to the same block but are left out. |
+| 7:Deals!AD73 | `=SUM(E73:AC73)` | extra_rows | The Total Volume range is stretched one column left into E73, which is not a volume column, while every peer Total Volume formula in column AD sums only F:AC. |
 | 7:Deals!F139 | `=D140-0.25` | wrong_reference | "D140" (D140) is used where "D139" (D139) belongs. |
 | 7:Deals!F169 | `=D170-0.25` | wrong_reference | "D170" (D170) is used where "D169" (D169) belongs. |
 | 7:Deals!AE142 | `=SUM(AE121:AE131)` | extra_rows | The 'Total per Model' subtotal for the EPE Purch from EPMI block should cover only rows 129-131, as its peer AD142 does, but the range is stretched up to row 121 and pulls in the PV rows that already belong to the main total in AE141. |
@@ -137,8 +140,6 @@
 | 11:Data!E36 | `=C5` | wrong_reference | "Swap amount" (C5) is used where "Swap amount" (C6) belongs. |
 | 11:Data!F51 | `=C5+D5` | wrong_sign | "Swap amount" (D5) is added here but should be subtracted. |
 | 11:Data!E54 | `=E36/C13` | wrong_reference | "tot volume" (C13) is used where "tot volume" (C12) belongs. |
-| 12:Summary!F4 | `=-AVERAGE(Exposure!C7:C18)` | wrong_sign | "IF NGPL MidContinent index (@ Forgan)" (AVERAGE(Exposure!C7:C18)) is subtracted here but should be added. |
-| 12:Summary!F5 | `=-AVERAGE(Exposure!D7:D18)` | wrong_sign | "IF NGPL MidContinent index" (AVERAGE(Exposure!D7:D18)) is subtracted here but should be added. |
 | 12:Summary!F6 | `=-AVERAGE(Exposure!E12:E18)` | None | unparseable reply |
 | 12:Summary!F8 | `=F6+F7` | wrong_sign | "Total Payables as of Jan 25, 2002" (F7) is added here but should be subtracted. |
 | 12:Summary!F13 | `=-AVERAGE(Exposure!F7:F12)` | skipped_rows | The AVERAGE range stops short: F13 belong to the same block but are left out. |
@@ -153,6 +154,7 @@
 | 20:Sheet1!J68 | `=C68*E68` | missing_term | The VALUE for the 'ENE Bonus Phantom' row should be SHARES times the price spread (E68-F68), as in the peer rows, but the F68 term is dropped, so the formula returns the full SHARES amount instead of the spread. |
 | 20:Sheet1!J84 | `=C84*E84` | missing_term | The VALUE for the GE long stock position should be shares times the price difference (E84-F84), as in the peer row 85 and the PROFIT/(LOSS) column, but the cost term F84 is dropped, so the formula returns the gross market value instead of the net value. |
 | 20:Sheet1!J116 | `=C116*E116` | missing_factor | The VALUE for Am. Century Growth should be SHARES times the per-share gain (E116-F116), but the formula drops the F116 term and multiplies shares by the price alone, unlike the peer rows J117 and J118. |
+| 20:Sheet1!K48 | `=J48` | missing_factor | The 'TAX VALUE > NET AFTER' column should apply the 0.614 net-after-tax factor to the 'VALUE' in J48, as the peer rows K49 and K50 do, but this cell just copies J48 unchanged. |
 | 20:Sheet1!M16 | `=C16*E16*-1` | wrong_sign | "ENE jan 02 35 calls" (E16) is subtracted here but should be added. |
 | 20:Sheet1!M109 | `=K112` | wrong_reference | "TOTAL" (K112) is used where "Income Taxes due 2003" (K109) belongs. |
 | 20:Sheet1!C112 | `=SUM(C53:C65)+C32+C38+C45+C48+C49+C50` | skipped_rows | The SUM range stops short: Cash, Muni Bonds, Govt. paper, ENE jan 02 35 calls, ENE jan 02 40 calls belong to the same block but are left out. |
@@ -171,8 +173,8 @@
 | 21:Sheet1!E105 | `=+E103+E92` | wrong_reference | "(Retro billed March 20, 2001)" (E92) is used where "E93" (E93) belongs. |
 | 21:Sheet1!G114 | `=SUM(B86:B91)` | skipped_rows | The SUM range stops short:  belong to the same block but are left out. |
 | 21:Sheet1!H114 | `=D114-G114` | wrong_sign | "Nov, 1996 - Jan, 2001 Revenue" (G114) is subtracted here but should be added. |
+| 21:Sheet1!F117 | `=D117` | missing_factor | The 'Split Retro-active Amount 50/50' column should halve the 'Amt in Dispute' amount, but this cell copies D117 in full, unlike the peer rows F115 and F116, which divide by 2. |
 | 21:Sheet1!H117 | `=D117` | missing_term | The 'TW Gives Up & No Interest 6 Months Back' amount should be the 'Amt in Dispute' (D117) minus the '6 Months Back' interest (G117), but the broken formula drops the G117 term and just repeats D117, unlike the peer row H115 (=D115-G115). |
-| 21:Sheet1!E116 | `=D116` | missing_factor | The column header says 'Split Retro-active Amount 50/50', so the amount should be halved, but the formula returns the full 'Amt in Dispute' from D116, unlike the peer rows that divide by 2. |
 | 21:Sheet1!E118 | `=D118` | missing_factor | The 'Split Retro-active Amount 50/50' column should halve the 'Amt in Dispute' amount, but this cell copies D118 without dividing by 2, unlike the peer row E114 (=D114/2). |
 | 21:Sheet1!E124 | `=E116` | missing_factor | The 'Split Retro-active Amount 50/50' label requires halving the revenue, but the formula returns the full Feb, 2001 - Oct, 2001 Revenue amount, unlike the peer row E114 which divides by 2. |
 | 21:Sheet1 (2)!H115 | `=D115` | missing_factor | The 'TW Gives Up' amount should be the 'Amt in Dispute' (D115) multiplied by the '6 Months Back & No Interest' rate (G115), but the rate factor is dropped, so the cell just repeats the dispute amount. |
@@ -183,7 +185,6 @@
 | 21:Sheet1 (2)!F127 | `=D127-E127` | wrong_sign | "Aug, 2000 - Jan, 2001 Interest" (E127) is subtracted here but should be added. |
 | 22:Sheet1!D5 | `=D4-D3` | wrong_sign | "LTD Liquidations as of 12/31" (D4) is added here but should be subtracted. |
 | 23:INCOME STATEMENT!C29 | `=SUM(C7:C27)` | skipped_rows | The SUM range stops short: 'ENA IS'!C21 belong to the same block but are left out. |
-| 23:ENW IS!C23 | `=SUM(C15:C22)` | wrong_sign | "Operating Expenses" (C17) is added here but should be subtracted. |
 | 23:Europe Burn!E26 | `=SUM(E23:E25)` | extra_rows | The 'Total Expenses net of Capitalized Expense' total should add only 'Depreciation & Amortization' and 'Taxes Other Than Income', but the range was stretched up to include the 'Total' subtotal in E23, which is not an expense line. |
 | 23:Europe Burn!K26 | `=SUM(K23:K25)` | extra_rows | The 'Total Expenses net of Capitalized Expense' subtotal should add only 'Depreciation & Amortization' and 'Taxes Other Than Income', but the range was extended up to include the 'Total' row (K23), which is the sum of the expense lines above. |
 | 23:Europe Burn!M26 | `=SUM(M23:M25)` | extra_rows | The 'Total Expenses net of Capitalized Expense' subtotal should add only Depreciation & Amortization and Taxes Other Than Income, but the range was stretched up to include the 'Total' subtotal in M23, which is a separate line. |

@@ -1,0 +1,169 @@
+001 | real_error | high | The IMBALANCE running total skips F35, while surrounding rows carry forward the immediately preceding balance.
+002 | real_error | high | Total Cash Burn Rate omits Other Cash Payments and Less: DD&A, instead referencing blank I31.
+003 | cannot_tell | medium | K153 and K154 apply the same rate to different totals, but neither result has a distinguishing label.
+004 | cannot_tell | medium | The exposure rows lack dates needed to determine whether E12:E18 covers the intended payable period.
+005 | real_error | medium | AA34 breaks the established one-row source offset, while adjacent AB34 and AC34 still reference row 35.
+006 | not_error | high | Less: DD&A correctly negates G8, labelled Depreciation & Amortization, matching neighbouring columns.
+007 | not_error | high | Less: DD&A correctly subtracts depreciation already included in total expenses.
+008 | real_error | high | Total Cash Burn Rate omits Other Cash Payments and Less: DD&A while adding blank Q20.
+009 | real_error | high | The total excludes M11 Other Cash Payments and M12 Less: DD&A, both included by the corresponding E15 formula.
+010 | cannot_tell | medium | The range correctly excludes the broader D47 total, but the window does not establish why these amounts belong under Capacity.
+011 | not_error | high | Less: DD&A correctly negates Q24, labelled Depreciation & Amortization, matching adjacent columns.
+012 | cannot_tell | medium | The subtraction reverses hourly neighbours but matches other Z-column differences, whose array formulas are unavailable.
+013 | not_error | high | Turbines Included contains binary inclusion flags, so SUM counts included turbines, consistent with G165.
+014 | not_error | high | Less: DD&A correctly negates depreciation in K11, matching all visible neighbouring formulas.
+015 | real_error | high | Total Cash Burn Rate omits Other Cash Payments and Less: DD&A, unlike the corresponding E27 total.
+016 | cannot_tell | medium | The external workbook's dates and values are absent, so its four referenced rows cannot be checked against April 28 through May 4.
+017 | real_error | high | Total Cash Burn Rate omits Q23 Other Cash Payments and Q24 Less: DD&A while adding blank Q25.
+018 | real_error | high | The total omits K21 Other Cash Payments and K22 Less: DD&A, both included in the corresponding E25 formula.
+019 | not_error | high | The Stock total includes phantom and restricted stock, while the excluded option rows are counted separately in E3.
+020 | real_error | medium | The NM fixed-price row references a Rio Grande value already used by the separately labelled RG row.
+021 | not_error | high | Less: DD&A correctly negates O6 Depreciation & Amortization, matching neighbouring columns.
+022 | not_error | high | Less: DD&A subtracts depreciation already included in total expenses, and E20 includes this adjustment.
+023 | real_error | high | Total Cash Burn Rate omits I21 Other Cash Payments and I22 Less: DD&A while adding blank I23.
+024 | real_error | high | The fee total includes AL11's unit price of 0.115 alongside daily fees that already multiply by that price.
+025 | cannot_tell | medium | Neighbouring totals include Billable Expense Clearing, but L121 is blank and its applicability to this plan is unspecified.
+026 | real_error | medium | Daily references jump from B34 to B36 despite consecutive dates, while adjacent AB34 retains the established source-row offset.
+027 | real_error | high | The total omits K29 Other Cash Payments and K30 Less: DD&A, unlike the corresponding E33 formula.
+028 | real_error | high | Total Cash Burn Rate omits I16 Other Cash Payments and I17 Less: DD&A while adding blank I18.
+029 | real_error | medium | Consecutive August dates accompany a skipped source row B35, while adjacent AB34 still references source row 35.
+030 | real_error | high | The total omits K23 Other Cash Payments and K24 Less: DD&A, both included in the corresponding E27 formula.
+031 | cannot_tell | medium | Exposure dates and contract duration are absent, so the window cannot establish whether the average should include zero-valued F13.
+032 | not_error | high | Less: DD&A correctly negates M8 Depreciation & Amortization, matching neighbouring columns.
+033 | not_error | medium | AA42 combines Fuel Rate and Prod.Tx Rate, making it a coherent rate to multiply by Injected Volume.
+034 | real_error | high | Total Cash Burn Rate omits I11 Other Cash Payments and I12 Less: DD&A while adding blank I13.
+035 | not_error | high | Q15 totals the preceding expense rows, so adding it once alongside depreciation and taxes does not double-count those rows.
+036 | real_error | high | The total omits I13 Other Cash Payments and I14 Less: DD&A, both included in the corresponding E17 formula.
+037 | real_error | high | Total Cash Burn Rate omits Q23 Other Cash Payments and Q24 Less: DD&A while adding blank Q25.
+038 | real_error | high | Total San Juan Expansion excludes the 5,000,000 Gallup CS Mods entry within the same cost block.
+039 | real_error | high | Total Cash Burn Rate omits Q21 Other Cash Payments and Q22 Less: DD&A while adding blank Q23.
+040 | not_error | high | Less: DD&A correctly negates M24 Depreciation & Amortization, matching adjacent columns.
+041 | not_error | high | E12 removes depreciation already included in E8, and the cash-burn total includes this negative adjustment.
+042 | real_error | medium | E36 skips the preceding day's E35 burn value, breaking the established previous-row carry-forward pattern.
+043 | not_error | high | The formula includes total expenses, capital expenditures, other cash payments, and the negative DD&A adjustment exactly as labelled.
+044 | not_error | high | Less: DD&A correctly subtracts K18 Depreciation & Amortization, matching neighbouring formulas.
+045 | not_error | high | Less: DD&A correctly negates Q6 Depreciation & Amortization rather than the entire expense total.
+046 | cannot_tell | medium | AD142 uses a narrower range, but the labels do not establish whether the additional negative PV billings belong in AE142.
+047 | not_error | high | G15 contributes the preceding expense subtotal once, alongside separate depreciation and tax amounts.
+048 | real_error | high | The Total subtotal stops at March despite later monthly subtotals and neighbouring totals extending through column V.
+049 | real_error | high | June 30 references blank F36, breaking the established one-row offset retained by adjacent AB34.
+050 | real_error | high | The he23 gas calculation multiplies he22 MW by he23 HR instead of using its own row's MW.
+051 | real_error | medium | Interstate Fixed Price references J49 labelled Variable Price, conflicting with the target's stated price type.
+052 | real_error | high | Total Cash Burn Rate omits M13 Other Cash Payments and M14 Less: DD&A while adding blank M15.
+053 | cannot_tell | medium | December omits the neighbours' 0.1 deduction, but no label explains whether that adjustment applies in December.
+054 | real_error | high | Total Cash Burn Rate omits O13 Other Cash Payments and O14 Less: DD&A while adding blank O15.
+055 | not_error | high | The 50/50 heading applies to retroactive amounts, while row 118 explicitly contains future estimated revenue.
+056 | not_error | medium | The formula includes all 24 populated volume cells, and the excluded E15 is blank.
+057 | not_error | high | Less: DD&A correctly negates O11 Depreciation & Amortization, matching neighbouring columns.
+058 | not_error | medium | The total AT ene label supports including ENE holdings while excluding the separately labelled Stable Asset entries.
+059 | not_error | high | Less: DD&A correctly subtracts O16 Depreciation & Amortization already included in total expenses.
+060 | cannot_tell | medium | The subtraction reverses hourly neighbours but matches other Z-column differences, whose underlying array formulas are unavailable.
+061 | real_error | high | Total Cash Burn Rate omits M29 Other Cash Payments and M30 Less: DD&A while adding blank M31.
+062 | cannot_tell | medium | The subtraction reverses hourly neighbours but matches other Z-column differences, whose underlying array formulas are unavailable.
+063 | real_error | high | Jan Salaries adds Total Headcount to an already included Sr. Specialist count without any salary conversion.
+064 | not_error | high | Less: DD&A correctly removes depreciation already included in E18, and E25 includes this negative adjustment.
+065 | real_error | high | I29 already subtracts H28, and subtracting H33 deducts H28 again because H33 sums H28:H32.
+066 | real_error | high | Total Cash Burn Rate omits M18 Other Cash Payments and M19 Less: DD&A while adding blank M20.
+067 | not_error | high | M108 labels this separate summary as total, supporting M109's reference to the overall K112 total.
+068 | real_error | high | Total Cash Burn Rate omits Q16 Other Cash Payments and Q17 Less: DD&A while adding blank Q18.
+069 | cannot_tell | medium | The Volumetric label does not establish whether AQ44 is a charge or credit against the total bill.
+070 | cannot_tell | medium | Monthly base amounts vary, and no labelled source establishes whether October should use 2.9 or 3.9.
+071 | not_error | medium | The total AT ene summary adds ENE holdings to the prior ENE subtotal while excluding nearby GE and Cash entries.
+072 | not_error | high | Less: DD&A correctly negates I8 Depreciation & Amortization, matching neighbouring columns.
+073 | not_error | high | Less: DD&A correctly negates K8 Depreciation & Amortization rather than the entire expense total.
+074 | real_error | high | Total Cash Burn Rate omits M21 Other Cash Payments and M22 Less: DD&A while adding blank M23.
+075 | real_error | high | October 30 references blank F36, breaking the established one-row offset retained by adjacent AB34 and AC34.
+076 | not_error | high | Z91 calculates actual minus test costs, matching the explicitly labelled cost summary in Z86:Z88.
+077 | not_error | high | E15 contributes the preceding expense subtotal once, alongside separate depreciation and tax amounts.
+078 | not_error | high | Less: DD&A removes depreciation already included in E26, and E33 includes this negative adjustment.
+079 | cannot_tell | medium | Column G has no heading or supporting calculations explaining why G18 combines blank G17 with the Hong Kong debt amount.
+080 | cannot_tell | medium | The BURN label and neighbouring balances do not explain whether the hardcoded 1472 is an addition or deduction.
+081 | not_error | high | Z94 follows the actual-minus-test cost convention explicitly used by the summary in Z86:Z88.
+082 | real_error | high | Total Cash Burn Rate omits K16 Other Cash Payments and K17 Less: DD&A while adding blank K18.
+083 | real_error | high | Total Cash Burn Rate omits O16 Other Cash Payments and O17 Less: DD&A while adding blank O18.
+084 | not_error | high | Turbines Included contains binary inclusion flags, so SUM counts included turbines, consistent with G222.
+085 | real_error | high | The total omits I23 Other Cash Payments and I24 Less: DD&A, both included in the corresponding E27 formula.
+086 | not_error | high | VALUE calculates shares times price, while the separate PROFIT/(LOSS) columns subtract cost, matching row 85.
+087 | real_error | high | Total Cash Burn Rate omits K18 Other Cash Payments and K19 Less: DD&A while adding blank K20.
+088 | not_error | high | Less: DD&A correctly negates E18 depreciation already included in E20 before the cash-burn total is calculated.
+089 | real_error | high | W43 includes only W38 although its component totals U43 and V43 both cover rows 32 through 38.
+090 | not_error | high | Less: DD&A correctly removes depreciation already included in E20, and E27 includes this negative adjustment.
+091 | not_error | high | Less: DD&A correctly removes depreciation already included in E10, and E17 includes this negative adjustment.
+092 | real_error | high | Total Cash Burn Rate omits G21 Other Cash Payments and G22 Less: DD&A, unlike the corresponding E25 total.
+093 | not_error | high | The Other Expenses section starts at row 117, placing Corporate Rent outside the subtotal's section.
+094 | real_error | high | Total Cash Burn Rate omits Q13 Other Cash Payments and Q14 Less: DD&A while adding blank Q15.
+095 | not_error | high | Less: DD&A correctly negates I24 Depreciation & Amortization, matching neighbouring columns.
+096 | cannot_tell | medium | The subtraction reverses hourly neighbours but matches other Z-column differences, whose underlying array formulas are unavailable.
+097 | not_error | high | Turbines Included contains binary inclusion flags, so SUM counts included turbines, consistent with G244.
+098 | real_error | high | Total Cash Burn Rate omits I18 Other Cash Payments and I19 Less: DD&A while adding blank I20.
+099 | cannot_tell | medium | Row neighbours and Z-column peers use opposite subtraction orders, and the window does not establish the intended sign convention.
+100 | not_error | high | TW Gives Up correctly equals the disputed amount minus the portion SoCal Pays.
+101 | not_error | high | Less: DD&A correctly subtracts O24 depreciation already included in total expenses.
+102 | real_error | high | Total Cash Burn Rate omits O23 Other Cash Payments and O24 Less: DD&A while adding blank O25.
+103 | real_error | high | H33 adds the positive land-sale gain to losses and is then subtracted in I35, incorrectly reducing income for a gain.
+104 | real_error | high | Total Cash Burn Rate omits K23 Other Cash Payments and K24 Less: DD&A while adding blank K25.
+105 | real_error | high | Total Cash Burn Rate omits O11 Other Cash Payments and O12 Less: DD&A while adding blank O13.
+106 | not_error | high | Turbines Included contains binary flags, so SUM correctly counts 87 included turbines rather than averaging their flags.
+107 | not_error | high | E12 contributes the preceding expense subtotal once, alongside separate depreciation and tax amounts.
+108 | cannot_tell | medium | Possible Price combines an index with transport charges, but the window does not specify whether this alternative should include fuel.
+109 | not_error | high | Less: DD&A correctly negates K24 Depreciation & Amortization, matching neighbouring columns.
+110 | real_error | high | Total Cash Burn Rate omits G29 Other Cash Payments and G30 Less: DD&A, unlike the corresponding E33 total.
+111 | real_error | high | Total Cash Burn Rate omits G16 Other Cash Payments and G17 Less: DD&A, unlike the corresponding E20 total.
+112 | not_error | high | Less: DD&A correctly subtracts M18 depreciation already included in total expenses.
+113 | not_error | medium | Z100 follows neighbouring cost differences, while the opposite-sign hourly differences compare generation quantities.
+114 | real_error | high | Total Cash Burn Rate omits M16 Other Cash Payments and M17 Less: DD&A while adding blank M18.
+115 | real_error | high | Total Cash Burn Rate omits G23 Other Cash Payments and G24 Less: DD&A, unlike the corresponding E27 total.
+116 | real_error | high | Total Cash Burn Rate omits O21 Other Cash Payments and O22 Less: DD&A while adding blank O23.
+117 | not_error | high | The formula calculates the index-price uplift using the 0.9496 fuel-retention factor, matching neighbouring calculations.
+118 | not_error | medium | The formula adds four distinct December-labelled counts once each, with no evidence supporting a repeated J172.
+119 | not_error | high | Turbines Included contains binary inclusion flags, so SUM counts turbines consistently with the neighbouring section.
+120 | real_error | high | October 30 references blank B36, skipping the established next source row while adjacent AB34 still references row 35.
+121 | real_error | high | Total Cash Burn Rate omits G11 Other Cash Payments and G12 Less: DD&A, unlike the corresponding E15 total.
+122 | not_error | high | The No Interest settlement assigns the full interest amount to TW Gives Up, matching the other interest row.
+123 | not_error | high | Less: DD&A correctly negates Q11 Depreciation & Amortization rather than the entire expense total.
+124 | not_error | high | Turbines Included contains binary inclusion flags, so SUM correctly counts included turbines.
+125 | cannot_tell | medium | C28 is unlabelled and its source's meaning is unavailable, so its inclusion in Total Monthly Cash Burn is unproven.
+126 | not_error | high | C12 adds two percentage rates, while the exchange fee is in dollars per MMBtu and is calculated separately in D11.
+127 | real_error | high | Total Cash Burn Rate omits O18 Other Cash Payments and O19 Less: DD&A while adding blank O20.
+128 | real_error | high | The total omits G13 Other Cash Payments and G14 Less: DD&A, both included in the corresponding E17 formula.
+129 | real_error | high | Total Cash Burn Rate omits I23 Other Cash Payments and I24 Less: DD&A while adding blank I25.
+130 | cannot_tell | medium | F92 has no heading or period definition establishing whether its six-row subtotal should include earlier rows.
+131 | cannot_tell | medium | The window lacks the underlying availability values and complete weights needed to determine whether the weighted average equals F45.
+132 | cannot_tell | medium | The subtraction reverses row neighbours but matches Z-column peers, and the intended sign convention is unspecified.
+133 | cannot_tell | medium | Z163 matches neighbouring cost differences but reverses hourly differences, with no explicit definition resolving the sign.
+134 | real_error | high | Total Cash Burn Rate omits G18 Other Cash Payments and G19 Less: DD&A, unlike the corresponding E22 total.
+135 | cannot_tell | medium | M129 lacks a nearby purpose label, and the window does not establish which later holdings its total should include.
+136 | cannot_tell | medium | All 25 peers use the same next-row offset, and the window lacks hour labels establishing the intended alignment.
+137 | not_error | medium | The SHARES total selects ENE stock holdings, while the excluded rows contain cash amounts and call-option positions.
+138 | real_error | high | Total Cash Burn Rate omits M23 Other Cash Payments and M24 Less: DD&A while adding blank M25.
+139 | cannot_tell | medium | The target date falls outside February and references a blank cell, with no source dates establishing whether this overflow row is meaningful.
+140 | real_error | high | Total Cash Burn Rate omits K11 Other Cash Payments and K12 Less: DD&A while adding blank K13.
+141 | real_error | medium | Consecutive July dates accompany a skipped source row B35, while adjacent AB34 retains the established source-row offset.
+142 | real_error | high | Total Gas Usage excludes the populated he6 entry in I8, although the MW total includes that hour.
+143 | not_error | high | Less: DD&A correctly negates Q18 Depreciation & Amortization rather than the entire expense total.
+144 | real_error | high | June 30 references blank B36 instead of following the established one-row offset retained by adjacent AB34.
+145 | cannot_tell | medium | Monthly Outside Services amounts vary, and no labelled source establishes whether September's base should be 1 or 0.9.
+146 | not_error | medium | Z103 follows neighbouring cost differences, while the opposite-sign hourly differences compare generation quantities.
+147 | not_error | high | E124 copies the matching February to October revenue settlement amount, while the earlier retroactive revenue is already halved separately.
+148 | real_error | high | M89 alone references row 57 while surrounding columns consistently reference row 56 for the same comparison.
+149 | not_error | high | E7 contributes the preceding expense subtotal once, alongside separate depreciation and tax amounts.
+150 | cannot_tell | medium | The underlying availability values and weighting basis are absent, so equality of the weighted and simple averages cannot be verified.
+151 | not_error | high | SUM counts the binary Turbines Included flags, while F175 separately averages availability.
+152 | not_error | high | G206:G221 contains turbine inclusion flags, so their sum gives the included turbine count.
+153 | not_error | high | The Turbines Included column contains twenty flags of 1, correctly totaling 20.
+154 | not_error | medium | E92 and E103 are nonoverlapping Interest subtotals that E105 combines.
+155 | real_error | medium | Consecutive March dates accompany a skipped source row B35, while adjacent AB34 retains the established one-row offset.
+156 | not_error | medium | The collection row consistently references I34, while I36 supplies the separately labelled Probability row.
+157 | cannot_tell | medium | Column Z and hourly neighbours use opposite subtraction orders, and the labels do not establish the intended sign convention.
+158 | not_error | high | Less: DD&A correctly negates Q8 Depreciation & Amortization.
+159 | real_error | high | Total Cash Burn Rate omits Q11 Other Cash Payments and Q12 Less: DD&A while adding blank Q13.
+160 | cannot_tell | medium | Column Z follows its vertical peers but reverses the hourly differences, with no label defining the required subtraction order.
+161 | not_error | high | Less: DD&A correctly subtracts G24 Depreciation & Amortization, matching neighbouring columns.
+162 | cannot_tell | medium | The cost differences use conflicting subtraction orders across the row and column without a stated sign convention.
+163 | not_error | high | Less: DD&A correctly negates O8 Depreciation & Amortization rather than total expenses.
+164 | real_error | high | The total omits K13 Other Cash Payments and K14 Less: DD&A, both included in the corresponding E17 total.
+165 | cannot_tell | medium | Vertical cost peers agree with the target but hourly peers reverse it, and Difference does not specify the intended sign.
+166 | not_error | high | Z95-Z96 matches the overall cost difference Z86-Z87, whose totals include Z95 and Z96 respectively.
+167 | not_error | high | E116 pays the later February to October revenue in full, while the earlier retroactive amount is halved separately in E114.
+168 | real_error | high | Total Cash Burn Rate omits M23 Other Cash Payments and M24 Less: DD&A while adding blank M25.
+169 | cannot_tell | medium | Vertical cost peers agree with the target but hourly peers reverse it, and the labels do not specify the intended sign convention.

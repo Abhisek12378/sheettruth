@@ -11,6 +11,8 @@ Usage:
 
 The model is reached through the Modal app deployed with:
   python -m modal deploy training/predict_glimmer_modal.py
+The reviewer model (second opinion) is used when these are set:
+  SHEETTRUTH_REVIEWER_BASE_URL, SHEETTRUTH_REVIEWER_MODEL, SHEETTRUTH_REVIEWER_API_KEY
 """
 from __future__ import annotations
 
@@ -26,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from sheettruth.agent.graph import AuditGraph  # noqa: E402
 from sheettruth.agent.model_client import ModalPredictorClient, SavedPredictionsClient  # noqa: E402
+from sheettruth.agent.reviewer import HostedReviewer, NoReviewer  # noqa: E402
 from sheettruth.data.recalc import Recalculator  # noqa: E402
 from sheettruth.verify import Verifier  # noqa: E402
 
@@ -41,6 +44,7 @@ def parse_args():
     ap.add_argument("--adapter-dir", default=DEFAULT_ADAPTER)
     ap.add_argument("--predictions", default="", help="reuse verdicts from this file instead of calling the model")
     ap.add_argument("--no-verify", action="store_true", help="skip LibreOffice recalculation in the verify agent")
+    ap.add_argument("--no-review", action="store_true", help="skip the reviewer model even when one is configured")
     return ap.parse_args()
 
 
@@ -49,7 +53,10 @@ def main() -> None:
     cfg = yaml.safe_load(open(args.config))
     model = SavedPredictionsClient(args.predictions) if args.predictions else ModalPredictorClient(args.adapter_dir)
     verifier = Verifier(None if args.no_verify else Recalculator(timeout=cfg["recalc"]["timeout_s"]))
-    state = AuditGraph(model, verifier).run(args.workbook, cfg, args.threshold, args.out)
+    reviewer = HostedReviewer()
+    if args.no_review or not reviewer.configured:
+        reviewer = NoReviewer()
+    state = AuditGraph(model, verifier, reviewer).run(args.workbook, cfg, args.threshold, args.out)
     for note in state["notes"]:
         print(note)
     print(f"report written to {args.out}")
