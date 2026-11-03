@@ -10,10 +10,10 @@ data/uploads/
 webapp/frontend/node_modules/
 webapp/backend/static/
 .pytest_tmp/
-
 data/*
 !data/test/
 data/test/*
 !data/test/subset_ids.txt
 train.jsonl
 val.jsonl
+models/

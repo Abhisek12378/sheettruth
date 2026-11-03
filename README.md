@@ -22,7 +22,9 @@ workbook ──> structure checks ──> context windows ──> meaning model 
    its row and column labels, the 5x5 grid around it, the cells above and below, the neighbours'
    formulas, the referenced ranges with their boundaries, and the labelled constants on the
    sheet. The same builder serves training and inference. Design notes: `docs/window_design.md`.
-3. **Meaning model**. A LoRA fine-tune of Muse Glimmer 30B (open weights) reads one window and answers
+3. **Meaning model**. A LoRA fine-tune of Muse Glimmer 30B (open weights; adapter published at
+   [Abhisek987/sheettruth-glimmer-30b-lora](https://huggingface.co/Abhisek987/sheettruth-glimmer-30b-lora))
+   reads one window and answers
    with a JSON verdict: `ok`, `error` (type, corrected formula, one-line reason) or
    `unsupported`. The probability of `error` is read from the generation step, so the flagging
    cutoff is a parameter. Nine error types: `wrong_function`, `skipped_rows`, `extra_rows`,
@@ -157,7 +159,7 @@ webapp/                 backend/ (FastAPI service, job worker), frontend/ (React
 .github/workflows/      test, build and deploy pipeline
 tests/                  mutators, prompt, verify agent, structure checks, the audit graph, the web API
 configs/default.yaml    every knob in one place
-docs/                   window design, verify agent, deployment
+docs/                   window design, verify agent, deployment, model card
 reports/                evaluation reports
 ```
 
