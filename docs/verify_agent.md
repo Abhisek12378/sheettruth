@@ -11,16 +11,21 @@ No check below reads the model's reason text or its probability.
 | sibling_sheets | compares the formula at the same address on the workbook's other sheets (a template repeated per unit or per period) | yes, when the fix matches the shared sibling formula and the current one does not | yes, when the current formula already matches the siblings |
 | range_delta | looks at the cells a range or reference fix adds or drops | yes, for a range extension when added cells hold real values, or for a range cut when the dropped cell looks foreign (parameter label, other number format, far-off magnitude); for a moved reference or an added term, a real added cell is only a precondition | yes, when added cells are blank or text, or dropped cells look like ordinary block members |
 | double_count | checks whether the current formula counts a cell twice or sums a subtotal of itself | yes | yes |
-| value_plausibility | compares the distance of the old and new value from the median of peer values | yes, when the fix moves the value much closer | yes, when it moves it much farther |
+| sign_convention | looks at a sign finding on a formula with a single reference, such as `=-B7` | no | yes; a lone negated reference is a sign convention the labels cannot settle |
+| value_plausibility | compares the distance of the old and new value from the median of peer values | reported as a hint only | reported as a hint only |
 
 Outcome per finding:
 
-- `passed`: at least one check supports the finding
-- `failed`: no check supports it and at least one contradicts it
-- `no_independent_check`: nothing could be tested
+- `failed`: the fix recalculates to an error value, or the structural checks only contradict it
+- `passed`: the structural checks support the finding and none contradicts it
+- `no_independent_check`: nothing could be tested, or the structural checks disagree with each other
 
-Recalculation is a necessary condition only: it can sink a finding whose fix evaluates to an
-error, but never carries one, because any fix that changes a value would otherwise pass.
+The structural checks are peer_pattern, sibling_sheets, range_delta, double_count and
+sign_convention. Recalculation is a necessary condition only: it can sink a finding whose fix
+evaluates to an error, but never carries one, because any fix that changes a value would
+otherwise pass. value_plausibility is kept in the report as a hint but never decides the
+outcome: a value moving closer to its neighbours is too weak to overrule a structural
+contradiction.
 
 Structure checks (`sheettruth/shape.py`) run before the model and need none of this: a typed
 number inside a run of identical formulas, and a formula whose shape differs from the formulas on

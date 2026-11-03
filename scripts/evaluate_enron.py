@@ -24,6 +24,7 @@ from openpyxl.utils import get_column_letter, range_boundaries
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from sheettruth.agent.reviewer import HostedReviewer  # noqa: E402
 from sheettruth.data.recalc import Recalculator  # noqa: E402
 from sheettruth.verify import Finding, Verifier  # noqa: E402
 from sheettruth.windows.cellinfo import Workbook  # noqa: E402
@@ -32,6 +33,7 @@ CELL_OR_RANGE = re.compile(r"\$?[A-Z]{1,3}\$?\d+(?::\$?[A-Z]{1,3}\$?\d+)?")
 
 
 SWEEP = (0.02, 0.05, 0.1, 0.2, 0.3, 0.5)
+REVIEW_CHUNK = 8
 
 
 def flagged_at(predictions: list[dict], threshold: float) -> dict[str, dict]:
@@ -184,6 +186,52 @@ def apply_verifier(windows: list[dict], verdicts: dict[str, dict], xlsx_dir: str
     return verdicts
 
 
+def load_review_cache(cache_path: str) -> dict[str, dict]:
+    """Cached reviews, leaving out the ones that failed for a technical reason so they are asked again."""
+    if not cache_path or not Path(cache_path).exists():
+        return {}
+    return {r["id"]: r["review"] for r in load_jsonl(cache_path) if not _technical_failure(r["review"])}
+
+
+def _technical_failure(review: dict) -> bool:
+    reason = review.get("reason", "")
+    return reason.startswith("reviewer unavailable") or reason == "reviewer reply could not be parsed"
+
+
+def fetch_reviews(flagged: list[dict], verdicts: dict[str, dict], cache: dict[str, dict], cache_path: str) -> None:
+    """Ask the reviewer about every flagged window not yet in the cache. Reviews are requested in
+    small chunks and the cache is saved after each chunk, so an interrupted run loses little."""
+    todo = [w for w in flagged if w["id"] not in cache]
+    reviewer = HostedReviewer()
+    if todo and not reviewer.configured:
+        sys.exit("set SHEETTRUTH_REVIEWER_BASE_URL, SHEETTRUTH_REVIEWER_MODEL and SHEETTRUTH_REVIEWER_API_KEY")
+    items = [{**w, "type": verdicts[w["id"]].get("type"), "expected": verdicts[w["id"]].get("expected"),
+              "reason": verdicts[w["id"]].get("reason", "")} for w in todo]
+    print(f"reviewer: {len(todo)} windows to review, {len(flagged) - len(todo)} from cache", flush=True)
+    for start in range(0, len(todo), REVIEW_CHUNK):
+        chunk_windows = todo[start:start + REVIEW_CHUNK]
+        for w, review in zip(chunk_windows, reviewer.review(items[start:start + REVIEW_CHUNK])):
+            cache[w["id"]] = review.to_dict()
+        if cache_path:
+            write_jsonl(cache_path, [{"id": k, "review": r} for k, r in cache.items()])
+        print(f"reviewer: {start + len(chunk_windows)}/{len(todo)} done", flush=True)
+
+
+def apply_reviewer(windows: list[dict], verdicts: dict[str, dict], cache_path: str) -> dict[str, dict]:
+    """Second opinion on every window still flagged after the code checks. A finding the reviewer
+    calls not_error is set back to ok unless a code check supported it (workbook facts outrank the
+    reviewer). Reviews are cached so reruns do not repeat the calls."""
+    cache = load_review_cache(cache_path)
+    flagged = [w for w in windows if verdicts.get(w["id"], {}).get("verdict") == "error"]
+    fetch_reviews(flagged, verdicts, cache, cache_path)
+    for w in flagged:
+        v = verdicts[w["id"]]
+        v["review"] = cache[w["id"]]
+        if v["review"]["verdict"] == "not_error" and v.get("verification") != "passed":
+            v["verdict"] = "ok"
+    return verdicts
+
+
 def write_jsonl(path: str, rows: list[dict]) -> None:
     with open(path, "w") as f:
         for r in rows:
@@ -200,6 +248,8 @@ def main() -> None:
     ap.add_argument("--verify", action="store_true", help="run the verify agent on flagged windows")
     ap.add_argument("--verify-mode", choices=["drop_failed", "passed_only"], default="drop_failed")
     ap.add_argument("--verify-cache", default="", help="jsonl of verification outcomes, reused across runs")
+    ap.add_argument("--review", action="store_true", help="send the remaining flagged windows to the reviewer model")
+    ap.add_argument("--review-cache", default="", help="jsonl of reviewer verdicts, reused across runs")
     ap.add_argument("--xlsx-dir", default="data/test/enron_errors_xlsx")
     ap.add_argument("--ids", default="", help="file with one window id per line; only those windows are scored")
     args = ap.parse_args()
@@ -219,6 +269,8 @@ def main() -> None:
     verdicts = flagged_at(predictions, args.threshold)
     if args.verify:
         verdicts = apply_verifier(windows, verdicts, args.xlsx_dir, args.verify_mode, args.verify_cache)
+    if args.review:
+        verdicts = apply_reviewer(windows, verdicts, args.review_cache)
     results = [judge_error(e, by_cell, verdicts) for e in errors]
     alarms = false_alarms(windows, verdicts, errors)
     n_flagged = sum(1 for w in windows if verdicts.get(w["id"], {}).get("verdict") == "error")

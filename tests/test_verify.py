@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from test_mutators import make_wb  # noqa: E402
 from sheettruth.shape import shape_findings  # noqa: E402
-from sheettruth.verify import Finding, Verifier  # noqa: E402
+from sheettruth.verify import Check, Finding, Verifier, _outcome  # noqa: E402
 
 
 def amount_table(extra=None):
@@ -79,3 +79,23 @@ def test_sibling_sheets_contradict_a_fix_that_breaks_the_template(tmp_path):
     result = Verifier(None).verify(Workbook(str(path)), str(path), Finding("Unit A", "B3", "=B1-B2", "=B2-B1", "wrong_sign"))
     assert result.outcome == "failed"
     assert any(c.name == "sibling_sheets" and c.result == "contradicts" for c in result.checks)
+
+
+def _check(name, result):
+    return Check(name, result, "")
+
+
+def test_outcome_fix_that_recalculates_to_an_error_fails():
+    checks = [_check("recalculated_fix", "contradicts"), _check("peer_pattern", "supports")]
+    assert _outcome(checks) == "failed"
+
+
+def test_outcome_disagreeing_structural_checks_are_not_independent():
+    checks = [_check("peer_pattern", "contradicts"), _check("range_delta", "supports")]
+    assert _outcome(checks) == "no_independent_check"
+
+
+def test_outcome_weak_hint_never_decides():
+    assert _outcome([_check("value_plausibility", "supports")]) == "no_independent_check"
+    assert _outcome([_check("sign_convention", "contradicts"), _check("value_plausibility", "supports")]) == "failed"
+    assert _outcome([_check("peer_pattern", "supports"), _check("value_plausibility", "contradicts")]) == "passed"

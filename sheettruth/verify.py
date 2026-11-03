@@ -19,9 +19,13 @@ Each check looks at the workbook itself:
                      the labels cannot settle, so it is contradicted
   value_plausibility after the fix, the target's value sits closer to its peers than before
 
-A finding passes when at least one check supports it, fails when checks only contradict it, and
-is reported as "no_independent_check" when nothing could be tested. Recalculation and the value
-change are necessary conditions: they can sink a finding but never carry it on their own.
+Outcome of a finding:
+  failed                 the fix recalculates to an error, or the structural checks only contradict
+  passed                 the structural checks (peer_pattern, sibling_sheets, range_delta,
+                         double_count, sign_convention) support the fix and none contradicts it
+  no_independent_check   nothing could be tested, or the structural checks disagree with each other
+Recalculation and the value change are necessary conditions: they can sink a finding but never
+carry it. value_plausibility is a weak hint: it is reported but never decides the outcome.
 """
 from __future__ import annotations
 
@@ -43,6 +47,7 @@ RANGE_SUPPORT_TYPES = {"skipped_rows", "extra_rows"}   # for these, what the fix
 PEER_SPAN = 15
 MIN_PEERS = 3
 PLAUSIBILITY_FACTOR = 2.0
+WEAK_CHECKS = {"value_plausibility"}   # reported as a hint, never decides the outcome
 
 
 @dataclass
@@ -283,11 +288,17 @@ class Verifier:
 
 
 def _outcome(checks: list[Check]) -> str:
-    """Supported by at least one check: passed. Only contradicted: failed. Otherwise nothing could be
-    tested. Recalculation and value change are necessary conditions, so they can only contradict."""
-    results = {c.result for c in checks}
-    if "supports" in results:
+    """A fix that recalculates to an error fails outright. Otherwise the structural checks decide:
+    support without contradiction passes, contradiction without support fails, and disagreement
+    between them is not an independent result. The weak value_plausibility hint never decides."""
+    by_name = {c.name: c.result for c in checks}
+    if by_name.get("recalculated_fix") == "contradicts":
+        return "failed"
+    structural = {c.result for c in checks if c.name not in WEAK_CHECKS}
+    if "supports" in structural and "contradicts" in structural:
+        return "no_independent_check"
+    if "supports" in structural:
         return "passed"
-    if "contradicts" in results:
+    if "contradicts" in structural:
         return "failed"
     return "no_independent_check"

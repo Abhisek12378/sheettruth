@@ -34,14 +34,17 @@ workbook ──> structure checks ──> context windows ──> meaning model 
    the proposed fix is written into a copy and recalculated with LibreOffice; the fix is compared
    with the formula pattern of neighbouring cells and of the same cell on sibling sheets; the
    cells a range fix adds or drops are inspected; double counting is checked in code; a sign
-   finding on a lone negated reference is treated as a convention; the fixed value is compared
-   with peer values. Outcome per finding: `passed`, `failed` or `no_independent_check`. Details:
-   `docs/verify_agent.md`.
+   finding on a lone negated reference is treated as a convention. Outcome per finding: `passed`
+   (structural checks support the fix and none contradicts it), `failed` (the fix recalculates
+   to an error, or the checks only contradict it) or `no_independent_check` (nothing could be
+   tested, or the checks disagree). Details: `docs/verify_agent.md`.
 5. **Second opinion** (`sheettruth/agent/reviewer.py`, optional). Findings not contradicted by
-   code can be sent to a hosted reviewer model with the same window and the claim; it answers
-   `real_error`, `not_error` or `cannot_tell` with one sentence. Each finding then carries a final
-   status: `confirmed`, `unverified`, `disputed` or `contradicted`. The reviewer is used when its
-   endpoint is configured through the environment.
+   code are sent to a hosted reviewer model (any OpenAI-compatible endpoint) with the same window
+   and the claim; it answers `real_error`, `not_error` or `cannot_tell` with one sentence. Each
+   finding then carries a final status: `confirmed`, `unverified`, `disputed` or `contradicted`.
+   Workbook evidence outranks the reviewer: a finding a code check supports stays confirmed even
+   if the reviewer disagrees. The reviewer is used when its endpoint is configured through the
+   environment.
 6. **Report**. Markdown for people, JSON for software, through the CLI or the web page.
 
 ## Training data
@@ -72,23 +75,32 @@ as found when a window covering one of its cells is flagged. Flagged windows out
 documented set are reported as false alarms, although the corpus lists only the errors people
 noticed, not every error in the files.
 
-| system | documented errors found (of 29 covered) | flagged windows outside the documented set |
-|---|---|---|
-| first fine-tune (v1), greedy verdict | 6 | 71 |
-| second fine-tune (v2), P(error) >= 0.5 | 18 | 222 |
-| v2 + verify agent, contradicted findings dropped | 17 | 160 |
-| v2 + verify agent, only supported findings kept | 15 | 141 |
+| system | documented errors found (of 29 covered) | flagged windows outside the documented set | precision |
+|---|---|---|---|
+| first fine-tune (v1), greedy verdict | 6 | 71 | n/a |
+| second fine-tune (v2), P(error) >= 0.5 | 18 | 222 | 0.11 |
+| v2 + verify agent (contradicted findings dropped) | 18 | 76 | 0.23 |
+| v2 + verify agent + reviewer second opinion | 17 | 31 | 0.38 |
 
-Ten of the 18 finds come with the exact documented correction. Lowering the cutoff to 0.3 finds
-21 before verification at 395 flagged windows.
+Precision counts windows: windows covering a documented error over all flagged windows. Ten of
+the 18 finds come with the exact documented correction. Lowering the cutoff to 0.3 finds 21
+before verification at 395 flagged windows. Full reports: `reports/enron_eval_v2.md`,
+`reports/enron_eval_v3_verified.md`, `reports/enron_eval_v3_reviewed.md`.
+
+**Prompted baseline.** The same windows and the same prompt sent to a hosted general model
+(Muse Spark Open, 578-window subset holding all error windows and 500 random ones): 18 found,
+49 flagged outside the list, precision 0.29, against 18 found and 45 outside the list for the
+fine-tuned 30B model on the same subset. The two agree on only 16 finds and 25 false alarms, so the
+fine-tune matches a much larger general model, and a second model sees different things, which
+is why the reviewer step exists.
 
 **What the flagged cells outside the list are.** The corpus records the errors people noticed, not
-every error in the files. An independent reviewer model was given the 160 remaining flagged cells
-with the same context windows, plus 10 documented errors mixed in unmarked. It recognised 9 of the
-10 documented errors, and judged 59 of the 160 to be real errors (6 distinct issues; 45 of the 59
-are one omission repeated on 45 template sheets of one workbook), 67 not errors, and 33 not
-decidable from the window. The review pack and answers are reproducible with `scripts/` and
-`reports/`.
+every error in the files. An independent reviewer model was given 160 flagged cells with the
+same context windows, plus 10 documented errors mixed in unmarked. It recognised 9 of the 10
+documented errors, and judged 59 of the 160 to be real errors (6 distinct issues; 45 of the 59 are
+one omission repeated on 45 template sheets of one workbook), 67 not errors, and 33 not decidable
+from the window. Of the 31 windows the full pipeline still flags outside the list, 8 are among the
+cells that review called real inconsistencies. The review pack and answers are in `reports/`.
 
 Three of the 33 errors are not covered: one uses a custom add-in function, one uses ROUND, one is
 a value cell. Per-error tables, categories and the full false-alarm lists are in `reports/`.
@@ -102,6 +114,9 @@ python -m pytest -q tests
 # model server (Modal account required; the adapter path is a parameter)
 python -m modal deploy training/predict_glimmer_modal.py
 
+# optional reviewer (any OpenAI-compatible chat endpoint)
+export SHEETTRUTH_REVIEWER_BASE_URL=https://...  SHEETTRUTH_REVIEWER_MODEL=...  SHEETTRUTH_REVIEWER_API_KEY=...
+
 # one workbook
 python scripts/audit_workbook.py path/to/book.xlsx --out reports/audit_book.md
 
@@ -110,7 +125,8 @@ uvicorn app.server:app --host 0.0.0.0 --port 8000
 ```
 
 LibreOffice is needed on the machine that runs the verify agent (recalculation). Without it the
-other checks still run and recalculation is reported as skipped.
+other checks still run and recalculation is reported as skipped. Without a reviewer endpoint the
+second opinion step is skipped and findings are reported from the code checks alone.
 
 ## Repository layout
 
@@ -142,7 +158,9 @@ bash scripts/build_v2.sh
 python -m modal run training/train_glimmer_modal.py --run-name <run> --train-file /data/train.jsonl --val-file /data/val.jsonl --epochs 1
 python scripts/build_test_windows.py --out data/test/windows.jsonl
 python -m modal run training/predict_glimmer_modal.py --input data/test/windows.jsonl --out data/test/predictions.jsonl --adapter-dir /models/<run>/adapter
-python scripts/evaluate_enron.py --predictions data/test/predictions.jsonl --verify
+python scripts/evaluate_enron.py --predictions data/test/predictions.jsonl --windows data/test/windows.jsonl --verify --verify-cache data/test/verify_cache.jsonl
+python scripts/evaluate_enron.py --predictions data/test/predictions.jsonl --windows data/test/windows.jsonl --verify --verify-cache data/test/verify_cache.jsonl --review --review-cache data/test/review_cache.jsonl
+python scripts/baseline_api.py --input data/test/windows.jsonl --out data/test/predictions_baseline.jsonl --base-url <endpoint> --model <model> --ids data/test/subset_ids.txt
 ```
 
 ## Requirements

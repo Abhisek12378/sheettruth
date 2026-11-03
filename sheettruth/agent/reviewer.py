@@ -61,6 +61,20 @@ class ReviewerClient(Protocol):
     def review(self, items: list[dict]) -> list[Review]: ...
 
 
+def complete_text(client, model: str, system: Optional[str], user: str, max_tokens: int) -> str:
+    """One text reply from an OpenAI-compatible endpoint. Chat completions first; endpoints that
+    only offer the Responses API are handled by the fallback."""
+    messages = ([{"role": "system", "content": system}] if system else []) + [{"role": "user", "content": user}]
+    try:
+        resp = client.chat.completions.create(model=model, max_tokens=max_tokens, temperature=0, messages=messages)
+        return resp.choices[0].message.content or ""
+    except Exception as chat_error:
+        if not hasattr(client, "responses"):
+            raise chat_error
+    resp = client.responses.create(model=model, max_output_tokens=max_tokens, input=messages)
+    return getattr(resp, "output_text", "") or ""
+
+
 def parse_review(text: str) -> Review:
     start, end = text.find("{"), text.rfind("}")
     try:
@@ -77,10 +91,13 @@ def review_prompt(item: dict) -> str:
 
 
 class HostedReviewer:
-    """Reviewer behind an OpenAI-compatible chat endpoint (settings from the environment unless given)."""
+    """Reviewer behind an OpenAI-compatible chat endpoint (settings from the environment unless given).
+
+    Reasoning models spend output tokens on their hidden reasoning before the visible answer, so
+    max_tokens must be generous or the visible answer is cut off and nothing can be parsed."""
 
     def __init__(self, base_url: Optional[str] = None, model: Optional[str] = None, api_key: Optional[str] = None,
-                 concurrency: int = 4, max_tokens: int = 4000):
+                 concurrency: int = 4, max_tokens: int = 16000):
         self.base_url = base_url or os.environ.get("SHEETTRUTH_REVIEWER_BASE_URL", "")
         self.model = model or os.environ.get("SHEETTRUTH_REVIEWER_MODEL", "")
         self.api_key = api_key or os.environ.get("SHEETTRUTH_REVIEWER_API_KEY", "")
@@ -94,15 +111,11 @@ class HostedReviewer:
     def _ask(self, item: dict) -> Review:
         from openai import OpenAI
 
-        client = OpenAI(base_url=self.base_url, api_key=self.api_key, timeout=300)
+        client = OpenAI(base_url=self.base_url, api_key=self.api_key, timeout=180, max_retries=1)
         try:
-            resp = client.chat.completions.create(
-                model=self.model, max_tokens=self.max_tokens, temperature=0,
-                messages=[{"role": "user", "content": review_prompt(item)}],
-            )
-            return parse_review(resp.choices[0].message.content or "")
+            return parse_review(complete_text(client, self.model, None, review_prompt(item), self.max_tokens))
         except Exception as ex:
-            return Review("cannot_tell", f"reviewer unavailable: {type(ex).__name__}")
+            return Review("cannot_tell", f"reviewer unavailable: {type(ex).__name__}: {str(ex)[:120]}")
 
     def review(self, items: list[dict]) -> list[Review]:
         if not items:

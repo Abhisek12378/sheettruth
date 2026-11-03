@@ -10,10 +10,10 @@ the same graph runs against the deployed model, against saved verdicts, with or 
 LibreOffice, with or without a reviewer. The `notes` list is the run log the report and the web
 page show.
 
-Final status of a finding:
+Final status of a finding (workbook facts first, reviewer opinion second, model claim last):
   contradicted   a code check speaks against it
-  disputed       no code check speaks against it, but the reviewer calls it not an error
-  confirmed      a code check supports it, or the reviewer calls it a real error
+  confirmed      a code check supports it, or no code check applied and the reviewer calls it a real error
+  disputed       no code check applied and the reviewer calls it not an error
   unverified     nothing could be tested and the reviewer could not tell
 """
 from __future__ import annotations
@@ -159,14 +159,15 @@ def _candidate(record: dict, verdict: dict) -> dict:
 
 
 def final_status(finding: dict) -> str:
+    """Workbook facts outrank the reviewer's opinion, which outranks the model's own claim."""
     outcome = finding["verification"]["outcome"]
     review = finding.get("review", {}).get("verdict", "cannot_tell")
     if outcome == "failed":
         return "contradicted"
-    if review == "not_error":
-        return "disputed"
     if outcome == "passed" or review == "real_error":
         return "confirmed"
+    if review == "not_error":
+        return "disputed"
     return "unverified"
 
 
