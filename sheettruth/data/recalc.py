@@ -10,6 +10,7 @@ private LibreOffice profile once, then run soffice headless with that macro on e
 """
 from __future__ import annotations
 
+import os
 import platform
 import shutil
 import subprocess
@@ -52,20 +53,10 @@ class Recalculator:
         if self.soffice:
             self.ready = self._install_macro()
 
-    def _env(self):
-        import os
+    def _env(self) -> dict:
+        """Environment for headless runs: the plain (svp) backend needs no display server."""
         env = os.environ.copy()
         env["SAL_USE_VCLPLUGIN"] = "svp"
-        # sandboxed Linux boxes may need the AF_UNIX shim used by the reference script
-        shim = Path("/mnt/skills/public/xlsx/scripts/office/soffice.py")
-        if shim.exists():
-            try:
-                import sys
-                sys.path.insert(0, str(shim.parent.parent))
-                from office.soffice import get_soffice_env  # type: ignore
-                env.update(get_soffice_env())
-            except Exception:
-                pass
         return env
 
     def _install_macro(self) -> bool:

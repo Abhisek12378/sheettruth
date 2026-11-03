@@ -19,7 +19,7 @@ Final status of a finding (workbook facts first, reviewer opinion second, model 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, TypedDict
+from typing import Callable, Optional, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
@@ -103,14 +103,16 @@ class AuditGraph:
     def second_opinion(self, state: AuditState) -> AuditState:
         """Findings not contradicted by code go to the reviewer; every finding gets a final status."""
         findings = state["findings"]
-        to_review = [f for f in findings if f["verification"]["outcome"] != "failed"]
+        has_reviewer = not isinstance(self.reviewer, NoReviewer)
+        to_review = [f for f in findings if f["verification"]["outcome"] != "failed"] if has_reviewer else []
         reviews = self.reviewer.review(to_review)
         for finding, review in zip(to_review, reviews):
             finding["review"] = review.to_dict()
         for finding in findings:
             finding["status"] = final_status(finding)
         statuses = {k: sum(1 for f in findings if f["status"] == k) for k in ("confirmed", "unverified", "disputed", "contradicted")}
-        return {"findings": findings, "notes": state["notes"] + [f"second opinion on {len(to_review)}; status {statuses}"]}
+        note = f"second opinion on {len(to_review)}; status {statuses}" if has_reviewer else f"no reviewer configured; status {statuses}"
+        return {"findings": findings, "notes": state["notes"] + [note]}
 
     def write_report(self, state: AuditState) -> AuditState:
         findings = state.get("findings", [])
@@ -146,10 +148,18 @@ class AuditGraph:
         g.add_edge("write_report", END)
         return g.compile()
 
-    def run(self, workbook_path: str, config: dict, threshold: float = 0.5, out_path: Optional[str] = None) -> AuditState:
-        initial: AuditState = {"workbook_path": workbook_path, "config": config, "threshold": threshold,
-                               "out_path": out_path or "", "notes": []}
-        return self.graph.invoke(initial)
+    def run(self, workbook_path: str, config: dict, threshold: float = 0.5, out_path: Optional[str] = None,
+            on_step: Optional[Callable[[str, AuditState], None]] = None) -> AuditState:
+        """Run the workflow on one workbook. When on_step is given it is called after every node
+        with the node's name and the state so far, which lets a caller report progress."""
+        state: AuditState = {"workbook_path": workbook_path, "config": config, "threshold": threshold,
+                             "out_path": out_path or "", "notes": []}
+        for event in self.graph.stream(state, stream_mode="updates"):
+            for node, update in event.items():
+                state.update(update)
+                if on_step is not None:
+                    on_step(node, state)
+        return state
 
 
 def _candidate(record: dict, verdict: dict) -> dict:

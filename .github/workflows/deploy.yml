@@ -1,0 +1,79 @@
+# Test on every push and pull request. On a push to main, build the front end and deploy
+# the application to the server over SSH, then check its health endpoint.
+#
+# Repository secrets needed for the deploy job:
+#   EC2_HOST      public address of the server
+#   EC2_USER      login user (ubuntu)
+#   EC2_SSH_KEY   private key with access to that user, PEM text
+
+name: Test and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Python tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q tests
+
+  build-frontend:
+    name: Build front end
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: webapp/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: webapp/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-static
+          path: webapp/backend/static
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to the server
+    needs: [test, build-frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      TARGET: ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
+      APP_DIR: /home/ubuntu/work/sheettruth
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-static
+          path: static
+      - name: Prepare the SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+      - name: Update the code on the server
+        run: ssh -i ~/.ssh/deploy_key "$TARGET" "bash $APP_DIR/webapp/deploy/update.sh ${{ github.sha }}"
+      - name: Upload the built front end
+        run: rsync -az --delete -e "ssh -i ~/.ssh/deploy_key" static/ "$TARGET:$APP_DIR/webapp/backend/static/"
+      - name: Restart the service and check its health
+        run: ssh -i ~/.ssh/deploy_key "$TARGET" "bash $APP_DIR/webapp/deploy/restart.sh"

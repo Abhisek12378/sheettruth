@@ -1,0 +1,17 @@
+# systemd unit for the SheetTruth web application.
+# Install: sudo cp webapp/deploy/sheettruth.service /etc/systemd/system/ && sudo systemctl daemon-reload
+# Settings (reviewer endpoint, adapter path) live in /etc/sheettruth.env, one KEY=value per line.
+[Unit]
+Description=SheetTruth web application
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/work/sheettruth
+EnvironmentFile=-/etc/sheettruth.env
+ExecStart=/home/ubuntu/work/.venv/bin/uvicorn webapp.backend.server:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

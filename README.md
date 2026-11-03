@@ -45,7 +45,19 @@ workbook ──> structure checks ──> context windows ──> meaning model 
    Workbook evidence outranks the reviewer: a finding a code check supports stays confirmed even
    if the reviewer disagrees. The reviewer is used when its endpoint is configured through the
    environment.
-6. **Report**. Markdown for people, JSON for software, through the CLI or the web page.
+6. **Report**. Markdown for people, JSON for software, and a corrected copy of the workbook with
+   the confirmed fixes written in, through the CLI or the web application.
+
+## The application
+
+`webapp/` holds the application: `backend/` (FastAPI) and `frontend/` (React + TypeScript). Upload a
+workbook, pick a strictness (the P(error) cutoff), and follow the audit step by step while it
+runs in a background worker. The result page groups findings by status, and each finding opens
+to show the model's reason, every code check with its evidence, the reviewer's verdict, and the
+exact context window the model saw. Downloads: the corrected workbook, the Markdown report and
+the full JSON detail. Earlier audits stay in the side bar. Every push to `main` runs the tests,
+builds the front end and deploys to the server (`.github/workflows/deploy.yml`); details in
+`docs/deploy.md`.
 
 ## Training data
 
@@ -120,8 +132,8 @@ export SHEETTRUTH_REVIEWER_BASE_URL=https://...  SHEETTRUTH_REVIEWER_MODEL=...  
 # one workbook
 python scripts/audit_workbook.py path/to/book.xlsx --out reports/audit_book.md
 
-# web page
-uvicorn app.server:app --host 0.0.0.0 --port 8000
+# web application (build the front end first: cd webapp/frontend && npm ci && npm run build)
+uvicorn webapp.backend.server:app --host 0.0.0.0 --port 8000
 ```
 
 LibreOffice is needed on the machine that runs the verify agent (recalculation). Without it the
@@ -141,10 +153,11 @@ sheettruth/data/        recalc.py (LibreOffice recalculation)
 training/               LoRA fine-tune (QLoRA, one GPU) and batched inference, both on Modal
 scripts/                corpus conversion and indexing, leakage filter, dataset build, label audit,
                         reviewer-model proposals, test windows, evaluation, hosted baselines, the audit CLI
-app/                    FastAPI front end
-tests/                  mutators, prompt, verify agent, structure checks, the audit graph
+webapp/                 backend/ (FastAPI service, job worker), frontend/ (React + TypeScript), deploy/ (server scripts)
+.github/workflows/      test, build and deploy pipeline
+tests/                  mutators, prompt, verify agent, structure checks, the audit graph, the web API
 configs/default.yaml    every knob in one place
-docs/                   window design, verify agent
+docs/                   window design, verify agent, deployment
 reports/                evaluation reports
 ```
 
