@@ -1,0 +1,72 @@
+# SheetTruth dataset config for the third-round build: higher per-type target and more
+# block-wide errors than the default. Everything else matches configs/default.yaml.
+# Every number here is a knob, not a fact. Counts are targets until the index is built.
+
+paths:
+  raw_dir: data/raw            # downloaded corpora (.xls/.xlsx), one subfolder per source
+  xlsx_dir: data/xlsx          # converted .xlsx, same subfolder layout
+  index_path: data/index.parquet
+  test_corpus_dir: data/test/enron_errors_xlsx   # the 30 held-out workbooks, NEVER used for training
+  test_overview: data/test/Enron-Errors.xlsx
+  out_dir: data/dataset
+
+sources:
+  - name: enron
+    weight: 0.6
+  - name: euses
+    weight: 0.4
+
+leakage_filter:
+  # drop a training workbook if it shares this share of row labels with any test workbook
+  label_overlap_threshold: 0.6
+  # also drop exact content duplicates by sha256
+  drop_exact_duplicates: true
+
+sampling:
+  max_cells_per_block: 2        # contiguous cells with the same R1C1 formula count as one block
+  max_cells_per_workbook: 8
+  min_workbooks: 1000
+  clean_share: 0.5              # half the examples are untouched cells labelled ok
+  hard_negative_share: 0.10     # share of the clean half that are suspicious-but-correct
+  unsupported_share: 0.10       # share of all examples whose target uses functions outside scope
+  seed: 20261030
+
+mutators:
+  # order matters: rarest first. A rare mutator wins whenever it applies.
+  enabled:
+    - missing_factor
+    - wrong_operator
+    - missing_term
+    - extra_rows
+    - wrong_reference
+    - skipped_rows
+    - double_count
+    - wrong_function
+    - wrong_sign
+  per_type_target: 2500
+  block_wide_probability: 0.75  # write the broken formula into the whole run of identical formulas
+
+window:
+  grid_radius: 2                # 5x5 grid around the target
+  col_above: 10
+  col_below: 3
+  row_left: 3
+  row_right: 3
+  row_right_extended: 5         # when the formula references same-row cells
+  range_head: 3
+  range_tail: 5
+  boundary_scan: 5              # rows past each range end to show
+  max_assumptions: 10
+  max_header_levels: 3
+  max_tokens: 1500
+  tokenizer: cl100k_base        # proxy tokenizer for budget checks
+
+recalc:
+  engine: libreoffice           # libreoffice | formulas
+  timeout_s: 120
+  on_failure: strip_values      # strip_values | drop_example
+
+output:
+  schema_version: 1
+  verdicts: [ok, error, unsupported]
+  unsupported_reasons: [missing_business_rule, truncated_evidence, unresolved_reference, out_of_scope_function]
