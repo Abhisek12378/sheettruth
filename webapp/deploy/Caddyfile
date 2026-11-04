@@ -1,0 +1,9 @@
+# Caddy configuration for the public SheetTruth web app.
+# Caddy terminates HTTPS (certificates from Let's Encrypt, renewed automatically) and forwards
+# every request to the FastAPI server listening on port 8000 on the same machine.
+# Install on the server as /etc/caddy/Caddyfile and reload with: sudo systemctl reload caddy
+
+sheettruth.com, www.sheettruth.com {
+	encode gzip
+	reverse_proxy localhost:8000
+}
