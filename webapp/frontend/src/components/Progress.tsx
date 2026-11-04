@@ -84,7 +84,7 @@ export function Progress({ job }: { job: Job }) {
   const active = activeIndex(job)
   const coldStart = running && PIPELINE[active]?.node === COLD_START_NODE
   return (
-    <section className="card progress" aria-live="polite" aria-labelledby="progress-title">
+    <section className="card progress" aria-labelledby="progress-title">
       <div className="progress-head">
         <div>
           <h2 id="progress-title">
@@ -100,7 +100,7 @@ export function Progress({ job }: { job: Job }) {
         </span>
       </div>
 
-      <ol className="steps">
+      <ol className="steps" aria-live="polite">
         {PIPELINE.map((step, index) => (
           <StepRow key={step.node} job={job} index={index} active={active} />
         ))}

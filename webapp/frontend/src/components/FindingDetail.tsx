@@ -39,6 +39,21 @@ export function FindingDetail({ finding, id }: { finding: Finding; id: string })
   const checks = orderedChecks(finding)
   return (
     <div className="finding-detail" id={id}>
+      <section>
+        <h4>Formula</h4>
+        <p className="formula-pair">
+          <code className="before">{finding.formula}</code>
+          {finding.expected && (
+            <>
+              <span className="arrow" aria-label="becomes">
+                →
+              </span>
+              <code className="after">{finding.expected}</code>
+            </>
+          )}
+        </p>
+      </section>
+
       <div className="finding-detail-grid">
         <section>
           <h4>Model’s reason</h4>

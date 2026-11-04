@@ -52,13 +52,17 @@ export function FindingRow({ finding, detailId, open, onToggle }: Props) {
         </span>
         <span className="type">{typeTitle(finding.type)}</span>
         <span className="formulas">
-          <code className="before">{finding.formula}</code>
+          <code className="before" title={finding.formula}>
+            {finding.formula}
+          </code>
           {finding.expected && (
             <>
               <span className="arrow" aria-label="becomes">
                 →
               </span>
-              <code className="after">{finding.expected}</code>
+              <code className="after" title={finding.expected}>
+                {finding.expected}
+              </code>
             </>
           )}
         </span>
