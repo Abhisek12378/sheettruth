@@ -1,9 +1,12 @@
-import { ADAPTER_URL, GITHUB_URL, PRODUCT_NAME } from '../labels'
+import { ADAPTER_URL, GITHUB_URL, MEANING_MODEL, MODEL_MAKER, PRODUCT_NAME, REVIEWER_MODEL } from '../labels'
 
 export function Footer() {
   return (
     <footer className="footer">
-      <span>{PRODUCT_NAME}. Every finding is checked against the workbook before it is reported.</span>
+      <span>
+        {PRODUCT_NAME} runs on {MEANING_MODEL} and {REVIEWER_MODEL} from {MODEL_MAKER}. Every finding is checked against
+        the workbook before it is reported.
+      </span>
       <nav aria-label="Project links">
         {GITHUB_URL && (
           <a href={GITHUB_URL} target="_blank" rel="noreferrer">

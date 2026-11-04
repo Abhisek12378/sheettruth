@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Health } from '../api'
-import { plural } from '../labels'
+import { MEANING_MODEL, REVIEWER_MODEL, plural } from '../labels'
 import { MarkIcon } from './MarkIcon'
 
 interface Props {
@@ -30,7 +30,7 @@ interface Line {
 
 function lines(health: Health): Line[] {
   return [
-    { ok: true, label: 'Formula model', detail: 'Ready', title: health.model },
+    { ok: true, label: 'Formula model', detail: `${MEANING_MODEL}, fine-tuned · ready`, title: health.model },
     {
       ok: health.recalculation,
       label: 'Recalculation',
@@ -39,7 +39,7 @@ function lines(health: Health): Line[] {
     {
       ok: health.reviewer,
       label: 'Second opinion',
-      detail: health.reviewer ? 'Reviewer model on' : 'Off: no reviewer model',
+      detail: health.reviewer ? `${REVIEWER_MODEL} · on` : 'Off: no reviewer model',
     },
     {
       ok: health.queued === 0,

@@ -12,6 +12,15 @@ export const TAGLINE =
 export const COLD_START_NOTE =
   'The first audit after a quiet spell takes an extra minute or two on this step while the model server wakes up. Nothing is stuck.'
 
+// The two models behind an audit.
+export const MODEL_MAKER = 'Meta'
+export const MEANING_MODEL = 'Muse Glimmer 30B'
+export const REVIEWER_MODEL = 'Muse Spark 1.3'
+export const MODELS: { kind: 'meaning' | 'reviewer'; name: string; role: string }[] = [
+  { kind: 'meaning', name: MEANING_MODEL, role: 'Fine-tuned by SheetTruth to read formulas and propose fixes' },
+  { kind: 'reviewer', name: REVIEWER_MODEL, role: 'Gives an independent second opinion on every finding' },
+]
+
 // Links shown in the footer. An empty string hides the link.
 export const GITHUB_URL = 'https://github.com/Abhisek12378/sheettruth'
 export const ADAPTER_URL = 'https://huggingface.co/Abhisek987/sheettruth-glimmer-30b-lora'
@@ -53,7 +62,7 @@ export const HOW_IT_WORKS = [
   },
   {
     title: 'Spot likely errors',
-    text: 'A model trained on spreadsheet mistakes flags formulas that look wrong and proposes a corrected version.',
+    text: `${MEANING_MODEL}, fine-tuned on spreadsheet mistakes, flags formulas that look wrong and proposes a corrected version.`,
   },
   {
     title: 'Test each fix',
@@ -61,7 +70,7 @@ export const HOW_IT_WORKS = [
   },
   {
     title: 'Get a second opinion',
-    text: 'An independent reviewer model judges every finding again, without seeing the first verdict.',
+    text: `${REVIEWER_MODEL} judges every finding again as an independent reviewer, without seeing the first verdict.`,
   },
   {
     title: 'Report and repair',

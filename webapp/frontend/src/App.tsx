@@ -4,6 +4,7 @@ import { Drawer } from './components/Drawer'
 import { Findings } from './components/Findings'
 import { Footer } from './components/Footer'
 import { Hero } from './components/Hero'
+import { ModelStrip } from './components/ModelStrip'
 import { History } from './components/History'
 import { HowItWorks } from './components/HowItWorks'
 import { Progress } from './components/Progress'
@@ -114,6 +115,7 @@ export default function App() {
           <Hero />
           <UploadCard busy={audit.uploading} onSubmit={audit.submit} />
           {audit.error && <ErrorNotice message={audit.error} onDismiss={audit.dismissError} />}
+          <ModelStrip />
         </div>
 
         <div id="results" className="results">

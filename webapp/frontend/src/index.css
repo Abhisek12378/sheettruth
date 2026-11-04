@@ -750,6 +750,80 @@ button.primary:disabled {
   box-shadow: none;
 }
 
+/* ---------- model credits ---------- */
+
+.models {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--s-3) var(--s-5);
+  padding: var(--s-2) 0;
+}
+.models-lead {
+  font-size: 0.84rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.models-lead strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.models ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.models li {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+.models-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex: none;
+}
+.models-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.models-name {
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+.models-role {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.by-model {
+  margin-left: var(--s-2);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+}
+
 /* ---------- results ---------- */
 
 .results {
@@ -1760,6 +1834,17 @@ td.mono {
   .how,
   .legend {
     grid-template-columns: 1fr;
+  }
+  .models {
+    flex-direction: column;
+    gap: var(--s-2);
+  }
+  .models ul {
+    flex-direction: column;
+    width: 100%;
+  }
+  .models li {
+    width: 100%;
   }
   .finding-head {
     padding-left: var(--s-3);

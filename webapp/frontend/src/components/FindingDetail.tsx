@@ -1,6 +1,6 @@
 import type { Check, Finding } from '../api'
 import { checkMark, isHint, orderedChecks } from '../findings'
-import { CHECK_RESULT_TITLE, CHECK_TITLE, REVIEW_TITLE } from '../labels'
+import { CHECK_RESULT_TITLE, CHECK_TITLE, MEANING_MODEL, REVIEWER_MODEL, REVIEW_TITLE } from '../labels'
 import { MarkIcon } from './MarkIcon'
 
 function CheckRow({ check }: { check: Check }) {
@@ -29,7 +29,10 @@ function ReviewSection({ finding }: { finding: Finding }) {
   }
   return (
     <section>
-      <h4>{REVIEW_TITLE[finding.review.verdict] || finding.review.verdict}</h4>
+      <h4>
+        {REVIEW_TITLE[finding.review.verdict] || finding.review.verdict}
+        <span className="by-model">{REVIEWER_MODEL}</span>
+      </h4>
       <p>{finding.review.reason}</p>
     </section>
   )
@@ -56,7 +59,10 @@ export function FindingDetail({ finding, id }: { finding: Finding; id: string })
 
       <div className="finding-detail-grid">
         <section>
-          <h4>Why it was flagged</h4>
+          <h4>
+            Why it was flagged
+            <span className="by-model">{MEANING_MODEL}</span>
+          </h4>
           <p>{finding.reason || 'No reason given.'}</p>
           {finding.run_cells.length > 1 && (
             <p className="muted small">
