@@ -156,6 +156,11 @@ export function UploadCard({ busy, onSubmit }: Props) {
           {sample.loading ? 'Loading the sample…' : 'Try a sample workbook'}
         </button>
         <span className="muted small">{SAMPLE_WORKBOOK.description}</span>
+        {file?.name === SAMPLE_WORKBOOK.name && (
+          <a className="sample-download" href={SAMPLE_WORKBOOK.path} download={SAMPLE_WORKBOOK.name}>
+            Download the sample to your computer
+          </a>
+        )}
       </div>
 
       {message && (
