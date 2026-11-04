@@ -1,10 +1,12 @@
 import { downloadUrl, type Job, type Summary as SummaryData } from '../api'
 import { STATUS_ORDER, STATUS_TITLE, duration, plural, strictnessLabel } from '../labels'
+import { NewAuditButton } from './NewAuditButton'
 import { StatusIcon } from './StatusIcon'
 
 interface Props {
   job: Job
   summary: SummaryData
+  onReset: () => void
 }
 
 function DownloadIcon() {
@@ -38,7 +40,7 @@ function statsLine(job: Job, summary: SummaryData): string {
   return parts.join(' · ')
 }
 
-export function Summary({ job, summary }: Props) {
+export function Summary({ job, summary, onReset }: Props) {
   const counts = summary.by_status
   return (
     <section className="card summary" aria-labelledby="summary-title">
@@ -81,9 +83,12 @@ export function Summary({ job, summary }: Props) {
           </span>
         </div>
       </div>
-      <p className="muted small">
-        The corrected workbook contains only the confirmed fixes, applied to every cell that shares the same formula.
-      </p>
+      <div className="summary-foot">
+        <p className="muted small">
+          The corrected workbook contains only the confirmed fixes, applied to every cell that shares the same formula.
+        </p>
+        <NewAuditButton onClick={onReset} label="Start over with another workbook" variant="link" />
+      </div>
     </section>
   )
 }

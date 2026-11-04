@@ -5,6 +5,7 @@ import { Findings } from './components/Findings'
 import { Footer } from './components/Footer'
 import { Hero } from './components/Hero'
 import { ModelStrip } from './components/ModelStrip'
+import { NewAuditButton } from './components/NewAuditButton'
 import { History } from './components/History'
 import { HowItWorks } from './components/HowItWorks'
 import { Progress } from './components/Progress'
@@ -59,10 +60,16 @@ function scrollToResults(): void {
   document.getElementById('results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+function scrollToTop(): void {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 export default function App() {
   const audit = useAudit()
   const { theme, toggle } = useTheme()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  // Remounting the upload card on each new session clears the chosen file and strictness.
+  const [session, setSession] = useState(0)
   const { selected } = audit
 
   const openAudit = useCallback(
@@ -74,6 +81,13 @@ export default function App() {
   )
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), [])
+
+  const startNew = useCallback(() => {
+    audit.reset()
+    setSession((n) => n + 1)
+    setDrawerOpen(false)
+    scrollToTop()
+  }, [audit.reset])
 
   // Scroll once the chosen audit has loaded, not on every poll of the same audit.
   const loadedId = selected?.id
@@ -100,12 +114,18 @@ export default function App() {
           </div>
         </div>
         <div className="topbar-right">
+          {selected && <NewAuditButton onClick={startNew} />}
           <StatusMenu health={audit.health} unreachable={audit.unreachable} />
           <ThemeToggle theme={theme} onToggle={toggle} />
         </div>
       </header>
 
-      <Drawer open={drawerOpen} title="Earlier audits" onClose={closeDrawer}>
+      <Drawer
+        open={drawerOpen}
+        title="Audits"
+        onClose={closeDrawer}
+        action={<NewAuditButton onClick={startNew} label="Start a new audit" variant="primary" />}
+      >
         <History jobs={audit.jobs} selected={audit.selectedId} onSelect={openAudit} />
       </Drawer>
 
@@ -113,7 +133,7 @@ export default function App() {
         <div className="hero-band">
           {audit.unreachable && <ServerBanner onRetry={audit.retry} />}
           <Hero />
-          <UploadCard busy={audit.uploading} onSubmit={audit.submit} />
+          <UploadCard key={session} busy={audit.uploading} onSubmit={audit.submit} />
           {audit.error && <ErrorNotice message={audit.error} onDismiss={audit.dismissError} />}
           <ModelStrip />
         </div>
@@ -122,7 +142,7 @@ export default function App() {
           {selected && selected.status !== 'done' && <Progress job={selected} />}
           {selected && result && summary && (
             <>
-              <Summary job={selected} summary={summary} />
+              <Summary job={selected} summary={summary} onReset={startNew} />
               <Findings findings={result.findings} />
               <StructureTable findings={result.structure} />
               <RunLog notes={result.notes} />

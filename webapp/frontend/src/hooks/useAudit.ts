@@ -62,6 +62,7 @@ export interface AuditState {
   submit: (file: File, threshold: number) => void
   dismissError: () => void
   retry: () => void
+  reset: () => void
 }
 
 export function useAudit(): AuditState {
@@ -137,6 +138,13 @@ export function useAudit(): AuditState {
 
   const dismissError = useCallback(() => setError(''), [])
 
+  // Closes the open audit and clears any error; the list of earlier audits stays.
+  const reset = useCallback(() => {
+    setSelectedId(null)
+    setSelected(null)
+    setError('')
+  }, [])
+
   return {
     health,
     unreachable,
@@ -149,5 +157,6 @@ export function useAudit(): AuditState {
     submit,
     dismissError,
     retry,
+    reset,
   }
 }

@@ -4,6 +4,7 @@ interface Props {
   open: boolean
   title: string
   onClose: () => void
+  action?: ReactNode
   children: ReactNode
 }
 
@@ -22,7 +23,7 @@ function useDrawerBehaviour(open: boolean, onClose: () => void, closeButton: HTM
   }, [open, onClose, closeButton])
 }
 
-export function Drawer({ open, title, onClose, children }: Props) {
+export function Drawer({ open, title, onClose, action, children }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null)
   useDrawerBehaviour(open, onClose, closeRef.current)
 
@@ -38,6 +39,7 @@ export function Drawer({ open, title, onClose, children }: Props) {
             </svg>
           </button>
         </div>
+        {action && <div className="drawer-action">{action}</div>}
         <div className="drawer-body">{children}</div>
       </aside>
     </div>
