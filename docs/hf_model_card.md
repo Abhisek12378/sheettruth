@@ -20,8 +20,12 @@ ranges and their boundaries) and answers whether the formula computes the wrong 
 error type, a corrected formula and a one-sentence reason.
 
 It is one component of [SheetTruth](https://github.com/Abhisek12378/sheettruth): the model proposes,
-a verify agent tests every finding against the workbook itself, and an optional reviewer model
-gives a second opinion.
+a verify agent tests every finding against the workbook itself, and a reviewer model (Muse Spark 1.3)
+gives a second opinion. Try it live at [sheettruth.com](https://sheettruth.com).
+
+Because the adapter is open and the rest of the audit is plain code, the whole pipeline can run
+inside a company's own network: this adapter on a local GPU, the verify agent with LibreOffice,
+and any locally hosted OpenAI-compatible model as the reviewer.
 
 ## Task
 
@@ -70,6 +74,24 @@ Ten of the 18 finds come with the exact documented correction. The corpus lists 
 people noticed, so some flagged cells outside the list are real inconsistencies; an independent
 review of 160 of them judged 59 to be real errors. Full reports are in the repository under
 `reports/`.
+
+A prompted baseline with the same windows and prompt (Muse Spark Open, 578-window subset) found 18
+with 49 flagged outside the list; this adapter found 18 with 45 on the same subset, and the two
+models agree on only 16 of the finds.
+
+Second benchmark, run at the same fixed cutoff with nothing tuned on it: the ExceLint corpus
+(Barowy, Berger and Zorn, 2018), 70 hand-audited spreadsheets from EUSES, 317 documented formula
+errors, 314 in scope, 6,210 windows.
+
+| system | documented errors found (of 314) | flagged windows outside the documented set | precision |
+|---|---|---|---|
+| this adapter, P(error) >= 0.5 | 100 | 185 | 0.35 |
+| + verify agent | 70 | 100 | 0.41 |
+| + reviewer second opinion | 52 | 49 | 0.52 |
+
+Recall is lower there partly because the ExceLint annotations also mark cells whose formula
+breaks the neighbours' pattern without changing the value, which this adapter is not trained to
+flag. Details are in the repository README.
 
 ## How to use
 
