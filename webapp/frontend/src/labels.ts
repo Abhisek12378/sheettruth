@@ -1,6 +1,14 @@
-// Human wording for the codes the API uses.
+// Human wording for the codes the API uses, and the fixed product copy.
 
 import type { FindingStatus } from './api'
+
+export const PRODUCT_NAME = 'SheetTruth'
+export const TAGLINE =
+  'Finds the formulas in a workbook that compute the wrong thing, then checks every finding against the workbook itself before reporting it.'
+
+// Links shown in the footer. An empty string hides the link.
+export const GITHUB_URL = 'https://github.com/Abhisek12378/sheettruth'
+export const ADAPTER_URL = 'https://huggingface.co/Abhisek987/sheettruth-glimmer-30b-lora'
 
 export const STATUS_ORDER: FindingStatus[] = ['confirmed', 'unverified', 'disputed', 'contradicted']
 
@@ -17,6 +25,36 @@ export const STATUS_HELP: Record<FindingStatus, string> = {
   disputed: 'No code check applied; the reviewer thinks the formula is intended as written.',
   contradicted: 'A code check on the workbook speaks against the fix. Most likely not an error.',
 }
+
+// One short line per status for the legend on the landing section.
+export const STATUS_LEGEND: Record<FindingStatus, string> = {
+  confirmed: 'Checks or the reviewer back the fix',
+  unverified: 'Nothing could test it; read and decide',
+  disputed: 'The reviewer thinks it is intended',
+  contradicted: 'A code check speaks against it',
+}
+
+// The six stages of the audit, as shown in the "how it works" strip.
+export const HOW_IT_WORKS = [
+  {
+    title: 'Structure checks',
+    text: 'Rules scan the whole workbook for numbers typed over formulas and odd ones out.',
+  },
+  {
+    title: 'Context windows',
+    text: 'Each run of identical formulas becomes one window: the formula, its inputs, the labels around them.',
+  },
+  {
+    title: 'Model verdicts',
+    text: 'A fine-tuned model reads each window and proposes a corrected formula with a probability.',
+  },
+  {
+    title: 'Code verification',
+    text: 'An agent tests each finding: recalculation, neighbours, sibling sheets, double counts, signs.',
+  },
+  { title: 'Second opinion', text: 'An independent reviewer model judges every finding again.' },
+  { title: 'Report', text: 'Four statuses, a readable report, and a corrected copy with the confirmed fixes only.' },
+]
 
 export const TYPE_TITLE: Record<string, string> = {
   wrong_function: 'Wrong function',
@@ -65,8 +103,16 @@ export function formatTime(seconds: number): string {
   return new Date(seconds * 1000).toLocaleString()
 }
 
+export function formatSeconds(total: number): string {
+  const s = Math.max(0, Math.round(total))
+  return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, '0')}s`
+}
+
 export function duration(job: { created_at: number; finished_at: number | null }): string {
   if (!job.finished_at) return ''
-  const s = Math.round(job.finished_at - job.created_at)
-  return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`
+  return formatSeconds(job.finished_at - job.created_at)
+}
+
+export function formatKilobytes(bytes: number): string {
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`
 }

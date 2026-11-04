@@ -1,5 +1,6 @@
 import { downloadUrl, type Job, type Summary as SummaryData } from '../api'
 import { STATUS_ORDER, STATUS_TITLE, duration } from '../labels'
+import { StatusIcon } from './StatusIcon'
 
 interface Props {
   job: Job
@@ -29,12 +30,18 @@ export function Summary({ job, summary }: Props) {
         {STATUS_ORDER.map((status) => (
           <div key={status} className={`tile ${status}`}>
             <span className="count">{counts[status]}</span>
-            <span className="name">{STATUS_TITLE[status]}</span>
+            <span className="name">
+              <StatusIcon status={status} />
+              {STATUS_TITLE[status]}
+            </span>
           </div>
         ))}
         <div className="tile structure">
           <span className="count">{summary.structure_findings}</span>
-          <span className="name">Structure findings</span>
+          <span className="name">
+            <StatusIcon status="structure" />
+            Structure findings
+          </span>
         </div>
       </div>
       <p className="muted small">

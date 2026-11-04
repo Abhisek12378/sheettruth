@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Finding, FindingStatus } from '../api'
 import { STATUS_HELP, STATUS_ORDER, STATUS_TITLE, percent, typeTitle } from '../labels'
 import { FindingDetail } from './FindingDetail'
+import { StatusIcon } from './StatusIcon'
 
 function findingKey(f: Finding): string {
   return `${f.sheet}!${f.addr}`
@@ -40,7 +41,7 @@ function StatusGroup({ status, findings }: { status: FindingStatus; findings: Fi
   return (
     <section className={`group ${status}`}>
       <h3>
-        {STATUS_TITLE[status]} <span className="count">{findings.length}</span>
+        <StatusIcon status={status} /> {STATUS_TITLE[status]} <span className="count">{findings.length}</span>
       </h3>
       <p className="muted small">{STATUS_HELP[status]}</p>
       <ul className="findings">
