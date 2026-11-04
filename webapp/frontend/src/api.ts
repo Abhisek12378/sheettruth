@@ -89,6 +89,7 @@ export interface Health {
   model: string
   recalculation: boolean
   reviewer: boolean
+  conversion?: boolean
   queued: number
 }
 

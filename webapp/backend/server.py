@@ -38,6 +38,7 @@ from webapp.backend.jobs import JobStore  # noqa: E402
 from sheettruth.agent.graph import AuditGraph  # noqa: E402
 from sheettruth.agent.model_client import ModalPredictorClient, SavedPredictionsClient  # noqa: E402
 from sheettruth.agent.reviewer import HostedReviewer, NoReviewer  # noqa: E402
+from sheettruth.data.convert import CONVERTIBLE_SUFFIXES, conversion_available, xls_to_xlsx  # noqa: E402
 from sheettruth.data.recalc import Recalculator  # noqa: E402
 from sheettruth.verify import Verifier  # noqa: E402
 
@@ -47,7 +48,9 @@ UPLOAD_DIR = Path(os.environ.get("SHEETTRUTH_UPLOAD_DIR", ROOT / "data" / "uploa
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 CONFIG = yaml.safe_load(open(ROOT / "configs" / "default.yaml"))
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024
-ALLOWED_SUFFIXES = (".xlsx", ".xlsm")
+ALLOWED_SUFFIXES = (".xlsx", ".xlsm") + CONVERTIBLE_SUFFIXES
+XLS_UNAVAILABLE = ("this server cannot convert .xls files right now; save the workbook as .xlsx in Excel "
+                   "and upload that instead")
 
 
 def build_graph() -> AuditGraph:
@@ -74,6 +77,7 @@ def health() -> dict:
         "model": "saved predictions" if SAVED_PREDICTIONS else f"Modal predictor ({ADAPTER_DIR})",
         "recalculation": shutil.which("soffice") is not None,
         "reviewer": isinstance(GRAPH.reviewer, HostedReviewer),
+        "conversion": conversion_available(),
         "queued": STORE.queue.qsize(),
     }
 
@@ -87,14 +91,26 @@ def list_audits() -> list[dict]:
 async def create_audit(file: UploadFile = File(...), threshold: float = Form(0.5)) -> dict:
     name = Path(file.filename or "").name
     if not name.lower().endswith(ALLOWED_SUFFIXES):
-        raise HTTPException(400, "please upload an .xlsx or .xlsm workbook")
+        raise HTTPException(400, "please upload an .xlsx, .xlsm or .xls workbook")
     if not 0.0 < threshold <= 1.0:
         raise HTTPException(400, "threshold must be between 0 and 1")
     data = await file.read()
     if len(data) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "workbook larger than 25 MB")
+    if name.lower().endswith(CONVERTIBLE_SUFFIXES):
+        data, name = _convert_legacy_upload(data, name)
     job = STORE.create(name, data, threshold)
     return job.to_dict()
+
+
+def _convert_legacy_upload(data: bytes, name: str) -> tuple[bytes, str]:
+    """Turn an .xls upload into the .xlsx the pipeline reads, or explain why that is not possible."""
+    if not conversion_available():
+        raise HTTPException(400, XLS_UNAVAILABLE)
+    try:
+        return xls_to_xlsx(data, name, timeout=CONFIG["recalc"]["timeout_s"])
+    except RuntimeError as exc:
+        raise HTTPException(400, f"the .xls file could not be converted ({exc}); save it as .xlsx and try again")
 
 
 @app.get("/api/audits/{job_id}")

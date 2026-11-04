@@ -16,12 +16,18 @@ interface Props {
 }
 
 const DEFAULT_THRESHOLD = 0.5
-const WORKBOOK_SUFFIXES = ['.xlsx', '.xlsm']
-const WRONG_TYPE_MESSAGE = 'That file is not an Excel workbook. Please choose a file that ends in .xlsx or .xlsm.'
+const WORKBOOK_SUFFIXES = ['.xlsx', '.xlsm', '.xls']
+const LEGACY_SUFFIX = '.xls'
+const WRONG_TYPE_MESSAGE = 'That file is not an Excel workbook. Please choose a file that ends in .xlsx, .xlsm or .xls.'
+const LEGACY_NOTE = 'older Excel format · it will be converted to .xlsx for the audit'
 
 function isWorkbook(file: File): boolean {
   const name = file.name.toLowerCase()
   return WORKBOOK_SUFFIXES.some((suffix) => name.endsWith(suffix))
+}
+
+function isLegacy(file: File): boolean {
+  return file.name.toLowerCase().endsWith(LEGACY_SUFFIX)
 }
 
 function UploadIcon() {
@@ -70,14 +76,16 @@ function DropzoneText({ file }: { file: File | null }) {
     return (
       <div className="dropzone-text">
         <strong>{file.name}</strong>
-        <span className="muted">{formatKilobytes(file.size)} · drop another file to replace it</span>
+        <span className="muted">
+          {formatKilobytes(file.size)} · {isLegacy(file) ? LEGACY_NOTE : 'drop another file to replace it'}
+        </span>
       </div>
     )
   }
   return (
     <div className="dropzone-text">
       <strong>Drop your workbook here</strong>
-      <span className="muted">or click to choose a file · .xlsx or .xlsm, up to 25 MB</span>
+      <span className="muted">or click to choose a file · .xlsx, .xlsm or .xls, up to 25 MB</span>
     </div>
   )
 }
@@ -146,7 +154,7 @@ export function UploadCard({ busy, onSubmit }: Props) {
         onClick={() => input.current?.click()}
         onKeyDown={keyOpen}
       >
-        <input ref={input} type="file" accept=".xlsx,.xlsm" hidden onChange={pick} aria-label="Workbook file" />
+        <input ref={input} type="file" accept=".xlsx,.xlsm,.xls" hidden onChange={pick} aria-label="Workbook file" />
         <UploadIcon />
         <DropzoneText file={file} />
       </div>
