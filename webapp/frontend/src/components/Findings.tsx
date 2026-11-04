@@ -37,11 +37,11 @@ export function Findings({ findings }: { findings: Finding[] }) {
   return (
     <div className="card findings-card">
       <div className="card-head">
-        <h2>Model findings</h2>
+        <h2>Formula findings</h2>
         <p className="muted small">
           {findings.length === 0
-            ? 'No formula was flagged at this strictness.'
-            : 'Each row is one run of identical formulas. Open a row for the reason, the code checks, the reviewer’s view and the exact window the model read.'}
+            ? 'No formula looked wrong at this strictness. Try the Sensitive setting to look harder.'
+            : 'Each row is one formula, or one group of cells sharing it. Open a row to see why it was flagged, the tests that were run, the second opinion and the exact cells the model read.'}
         </p>
       </div>
       {STATUS_ORDER.map((status) => (

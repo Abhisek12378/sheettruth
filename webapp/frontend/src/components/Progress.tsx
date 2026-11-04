@@ -46,8 +46,8 @@ function sentence(text: string): string {
 }
 
 function title(job: Job): string {
-  if (job.status === 'queued') return 'Waiting for the worker'
-  if (job.status === 'failed') return 'The audit failed'
+  if (job.status === 'queued') return 'Waiting in the queue'
+  if (job.status === 'failed') return 'This audit failed'
   return 'Auditing'
 }
 
@@ -91,8 +91,8 @@ export function Progress({ job }: { job: Job }) {
             {title(job)} <span className="progress-file">{job.filename}</span>
           </h2>
           <p className="muted small">
-            {job.status === 'queued' ? 'Another audit is running; yours starts as soon as the worker is free.' : ''}
-            {job.status === 'running' ? 'Each step reports when it finishes.' : ''}
+            {job.status === 'queued' ? 'Another audit is running. Yours starts as soon as it finishes.' : ''}
+            {job.status === 'running' ? 'Each step ticks off as it finishes. You can leave this page open.' : ''}
           </p>
         </div>
         <span className="elapsed" title={job.finished_at ? 'How long the audit ran' : 'Time since the upload'}>

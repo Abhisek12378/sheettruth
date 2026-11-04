@@ -3,12 +3,14 @@
 import type { FindingStatus } from './api'
 
 export const PRODUCT_NAME = 'SheetTruth'
+export const EYEBROW = 'Spreadsheet formula auditor'
+export const HEADLINE = 'Catch the formulas that quietly get it wrong.'
 export const TAGLINE =
-  'Finds the formulas in a workbook that compute the wrong thing, then checks every finding against the workbook itself before reporting it.'
+  'Upload an Excel workbook. SheetTruth reads every formula, flags the ones that look wrong, tests each fix against your own numbers, and gives you a corrected copy.'
 
 // Shown while the model step runs: the model server starts cold after a quiet spell.
 export const COLD_START_NOTE =
-  'The model server starts cold after a quiet spell, so the first audit in a while can spend an extra minute or two on this step. Nothing is stuck.'
+  'The first audit after a quiet spell takes an extra minute or two on this step while the model server wakes up. Nothing is stuck.'
 
 // Links shown in the footer. An empty string hides the link.
 export const GITHUB_URL = 'https://github.com/Abhisek12378/sheettruth'
@@ -23,41 +25,48 @@ export const STATUS_TITLE: Record<FindingStatus, string> = {
   contradicted: 'Contradicted',
 }
 
+// Longer explanation shown above each group of findings.
 export const STATUS_HELP: Record<FindingStatus, string> = {
-  confirmed: 'A code check on the workbook supports the fix, or the reviewer agrees it is a real error.',
-  unverified: 'No code check applied and the reviewer could not tell. Read the window and decide.',
-  disputed: 'No code check applied; the reviewer thinks the formula is intended as written.',
-  contradicted: 'A code check on the workbook speaks against the fix. Most likely not an error.',
+  confirmed: 'A test on your workbook backs the fix, or the second opinion agrees. Treat these as real errors.',
+  unverified: 'No test could settle this one and the second opinion was unsure. Read the cells and decide yourself.',
+  disputed: 'No test applied, and the second opinion thinks the formula is written that way on purpose.',
+  contradicted: 'A test on your workbook says the fix would be wrong. Most likely not an error.',
 }
 
-// One short line per status for the legend on the landing section.
+// One short line per status for the legend.
 export const STATUS_LEGEND: Record<FindingStatus, string> = {
-  confirmed: 'Checks or the reviewer back the fix',
-  unverified: 'Nothing could test it; read and decide',
-  disputed: 'The reviewer thinks it is intended',
-  contradicted: 'A code check speaks against it',
+  confirmed: 'Tested or reviewed: a real error',
+  unverified: 'Could not be tested: you decide',
+  disputed: 'Reviewer thinks it is on purpose',
+  contradicted: 'A test says the fix would be wrong',
 }
 
-// The six stages of the audit, as shown in the "how it works" strip.
+// The six stages of the audit, in plain words.
 export const HOW_IT_WORKS = [
   {
-    title: 'Structure checks',
-    text: 'Rules scan the whole workbook for numbers typed over formulas and odd ones out.',
+    title: 'Scan the layout',
+    text: 'Simple rules look for numbers typed over formulas and formulas that break the pattern of their neighbours.',
   },
   {
-    title: 'Context windows',
-    text: 'Each run of identical formulas becomes one window: the formula, its inputs, the labels around them.',
+    title: 'Read every formula',
+    text: 'Identical formulas are grouped and read together with the cells they use and the labels around them.',
   },
   {
-    title: 'Model verdicts',
-    text: 'A fine-tuned model reads each window and proposes a corrected formula with a probability.',
+    title: 'Spot likely errors',
+    text: 'A model trained on spreadsheet mistakes flags formulas that look wrong and proposes a corrected version.',
   },
   {
-    title: 'Code verification',
-    text: 'An agent tests each finding: recalculation, neighbours, sibling sheets, double counts, signs.',
+    title: 'Test each fix',
+    text: 'Code recalculates the fix and compares it with neighbouring formulas, other sheets and the labels.',
   },
-  { title: 'Second opinion', text: 'An independent reviewer model judges every finding again.' },
-  { title: 'Report', text: 'Four statuses, a readable report, and a corrected copy with the confirmed fixes only.' },
+  {
+    title: 'Get a second opinion',
+    text: 'An independent reviewer model judges every finding again, without seeing the first verdict.',
+  },
+  {
+    title: 'Report and repair',
+    text: 'You get findings sorted by how sure we are, plus a corrected copy containing only the confirmed fixes.',
+  },
 ]
 
 export const TYPE_TITLE: Record<string, string> = {
@@ -66,41 +75,46 @@ export const TYPE_TITLE: Record<string, string> = {
   extra_rows: 'Range reaches too far',
   double_count: 'Counted twice',
   wrong_sign: 'Wrong sign',
-  wrong_reference: 'Wrong reference',
-  missing_term: 'Missing term',
+  wrong_reference: 'Wrong cell referenced',
+  missing_term: 'Something left out',
   wrong_operator: 'Wrong operator',
-  missing_factor: 'Missing factor',
+  missing_factor: 'Missing multiplier',
 }
 
 export const CHECK_TITLE: Record<string, string> = {
-  recalculated_fix: 'Recalculated fix',
-  value_change: 'Value change',
+  recalculated_fix: 'Recalculated the fix',
+  value_change: 'Change in value',
   peer_pattern: 'Neighbouring formulas',
   sibling_sheets: 'Same cell on other sheets',
   range_delta: 'Cells added or dropped',
-  double_count: 'Double count',
-  sign_convention: 'Sign convention',
-  value_plausibility: 'Value plausibility',
+  double_count: 'Double counting',
+  sign_convention: 'Plus or minus convention',
+  value_plausibility: 'Is the new value plausible',
 }
 
 export const CHECK_RESULT_TITLE: Record<string, string> = {
-  supports: 'Supports',
-  contradicts: 'Contradicts',
-  neutral: 'Neutral',
-  skipped: 'Skipped',
+  supports: 'Supports the fix',
+  contradicts: 'Against the fix',
+  neutral: 'No verdict',
+  skipped: 'Not applicable',
 }
 
 export const REVIEW_TITLE: Record<string, string> = {
-  real_error: 'Reviewer: real error',
-  not_error: 'Reviewer: not an error',
-  cannot_tell: 'Reviewer: cannot tell',
+  real_error: 'Second opinion: a real error',
+  not_error: 'Second opinion: not an error',
+  cannot_tell: 'Second opinion: cannot tell',
 }
 
 export const STRICTNESS = [
-  { label: 'Sensitive', threshold: 0.3, help: 'More findings, more false alarms' },
-  { label: 'Balanced', threshold: 0.5, help: 'The default' },
-  { label: 'Strict', threshold: 0.7, help: 'Only the model’s surest findings' },
+  { label: 'Sensitive', threshold: 0.3, help: 'Flags more formulas, with more false alarms' },
+  { label: 'Balanced', threshold: 0.5, help: 'A good middle ground for most workbooks' },
+  { label: 'Strict', threshold: 0.7, help: 'Only the findings the model is surest about' },
 ]
+
+export function strictnessLabel(threshold: number): string {
+  const match = STRICTNESS.find((option) => Math.abs(option.threshold - threshold) < 0.001)
+  return match ? match.label : `custom (${threshold})`
+}
 
 export function typeTitle(type: string | null): string {
   return type ? TYPE_TITLE[type] || type : 'Error'
@@ -111,7 +125,7 @@ export function percent(p: number): string {
 }
 
 export function formatTime(seconds: number): string {
-  return new Date(seconds * 1000).toLocaleString()
+  return new Date(seconds * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 export function formatSeconds(total: number): string {
@@ -126,4 +140,8 @@ export function duration(job: { created_at: number; finished_at: number | null }
 
 export function formatKilobytes(bytes: number): string {
   return `${Math.max(1, Math.round(bytes / 1024))} KB`
+}
+
+export function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? '' : 's'}`
 }

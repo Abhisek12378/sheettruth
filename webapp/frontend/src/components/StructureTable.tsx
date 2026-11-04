@@ -11,22 +11,25 @@ export function StructureTable({ findings }: { findings: StructureFinding[] }) {
     <div className="card">
       <div className="card-head">
         <h2>
-          <StatusIcon status="structure" /> Structure findings
+          <StatusIcon status="structure" /> Layout problems
         </h2>
-        <p className="muted small">Found by rules on the formula layout alone, without the model.</p>
+        <p className="muted small">
+          Found by simple rules, without the model: numbers typed where a formula should be, and formulas that break the
+          pattern of their neighbours.
+        </p>
       </div>
       {findings.length === 0 ? (
-        <p className="muted">No structure problems were found.</p>
+        <p className="muted">No layout problems were found.</p>
       ) : (
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
                 <th scope="col">Cell</th>
-                <th scope="col">Kind</th>
-                <th scope="col">Current</th>
-                <th scope="col">The run implies</th>
-                <th scope="col">Detail</th>
+                <th scope="col">Problem</th>
+                <th scope="col">What is there now</th>
+                <th scope="col">What the pattern suggests</th>
+                <th scope="col">Why</th>
               </tr>
             </thead>
             <tbody>

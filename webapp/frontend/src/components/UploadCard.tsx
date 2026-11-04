@@ -8,21 +8,24 @@ interface Props {
 
 const DEFAULT_THRESHOLD = 0.5
 const WORKBOOK_SUFFIXES = ['.xlsx', '.xlsm']
-const WRONG_TYPE_MESSAGE = 'That is not an Excel workbook. Choose a file that ends in .xlsx or .xlsm.'
+const WRONG_TYPE_MESSAGE = 'That file is not an Excel workbook. Please choose a file that ends in .xlsx or .xlsm.'
 
 function isWorkbook(file: File): boolean {
   const name = file.name.toLowerCase()
   return WORKBOOK_SUFFIXES.some((suffix) => name.endsWith(suffix))
 }
 
-function WorkbookIcon() {
+function UploadIcon() {
   return (
-    <svg className="dropzone-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+    <svg className="dropzone-icon" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true" focusable="false">
+      <rect x="8" y="6" width="32" height="36" rx="5" fill="none" stroke="currentColor" strokeWidth="2.5" />
+      <path d="M8 16h32M8 26h32M19 16v26M30 16v26" stroke="currentColor" strokeWidth="2" opacity="0.35" />
+      <circle cx="35" cy="35" r="9.5" fill="var(--card)" stroke="currentColor" strokeWidth="2.5" />
       <path
-        d="M6 3h8l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm8 0v5h5M8 12h8M8 16h8M8 12v4m4-4v4m4-4v4"
+        d="M35 40v-9m-4 4 4-4 4 4"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -33,7 +36,7 @@ function WorkbookIcon() {
 function StrictnessPicker({ value, onChange }: { value: number; onChange: (t: number) => void }) {
   return (
     <fieldset className="strictness">
-      <legend>Strictness</legend>
+      <legend>How strict should the audit be?</legend>
       <div className="strictness-options">
         {STRICTNESS.map((option) => (
           <label key={option.threshold} className={value === option.threshold ? 'selected' : ''}>
@@ -44,7 +47,7 @@ function StrictnessPicker({ value, onChange }: { value: number; onChange: (t: nu
               checked={value === option.threshold}
               onChange={() => onChange(option.threshold)}
             />
-            <span>{option.label}</span>
+            <span className="strictness-name">{option.label}</span>
             <small>{option.help}</small>
           </label>
         ))}
@@ -58,14 +61,14 @@ function DropzoneText({ file }: { file: File | null }) {
     return (
       <div className="dropzone-text">
         <strong>{file.name}</strong>
-        <span className="muted small">{formatKilobytes(file.size)} · drop another file to replace it</span>
+        <span className="muted">{formatKilobytes(file.size)} · drop another file to replace it</span>
       </div>
     )
   }
   return (
     <div className="dropzone-text">
-      <strong>Drop a workbook here</strong>
-      <span className="muted small">or click to choose an .xlsx or .xlsm file</span>
+      <strong>Drop your workbook here</strong>
+      <span className="muted">or click to choose a file · .xlsx or .xlsm, up to 25 MB</span>
     </div>
   )
 }
@@ -118,7 +121,7 @@ export function UploadCard({ busy, onSubmit }: Props) {
   return (
     <form id="upload" className="card upload" onSubmit={submit} aria-label="Audit a workbook">
       <div
-        className={`dropzone${dragging ? ' dragging' : ''}`}
+        className={`dropzone${dragging ? ' dragging' : ''}${file ? ' has-file' : ''}`}
         role="button"
         tabIndex={0}
         aria-label={file ? `Chosen workbook ${file.name}. Choose another.` : 'Choose a workbook to audit'}
@@ -130,21 +133,26 @@ export function UploadCard({ busy, onSubmit }: Props) {
         onKeyDown={keyOpen}
       >
         <input ref={input} type="file" accept=".xlsx,.xlsm" hidden onChange={pick} aria-label="Workbook file" />
-        <WorkbookIcon />
+        <UploadIcon />
         <DropzoneText file={file} />
       </div>
-
-      <StrictnessPicker value={threshold} onChange={setThreshold} />
-
-      <button type="submit" className="primary" disabled={!file || busy}>
-        {busy ? 'Uploading…' : 'Audit workbook'}
-      </button>
 
       {message && (
         <p id="upload-message" className="upload-message" role="alert">
           {message}
         </p>
       )}
+
+      <div className="upload-controls">
+        <StrictnessPicker value={threshold} onChange={setThreshold} />
+        <button type="submit" className="primary" disabled={!file || busy}>
+          {busy ? 'Uploading…' : 'Audit this workbook'}
+        </button>
+      </div>
+      <p className="muted small upload-note">
+        Your file is only used for this audit. Nothing is changed in the original; fixes go into a separate corrected
+        copy.
+      </p>
     </form>
   )
 }

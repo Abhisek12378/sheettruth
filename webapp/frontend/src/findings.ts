@@ -42,19 +42,24 @@ export function codeAgreement(finding: Finding): Agreement {
   const decisive = finding.verification.checks.filter(isDecisive)
   const supports = decisive.filter((c) => c.result === 'supports').length
   const contradicts = decisive.length - supports
-  if (contradicts > 0) return { mark: 'fail', label: `${contradicts} check${contradicts > 1 ? 's' : ''} against` }
-  if (supports > 0) return { mark: 'pass', label: `${supports} check${supports > 1 ? 's' : ''} for` }
-  return { mark: 'skipped', label: 'No code test' }
+  if (contradicts > 0)
+    return {
+      mark: 'fail',
+      label: contradicts === 1 ? '1 test against the fix' : `${contradicts} tests against the fix`,
+    }
+  if (supports > 0)
+    return { mark: 'pass', label: supports === 1 ? '1 test backs the fix' : `${supports} tests back the fix` }
+  return { mark: 'skipped', label: 'Could not be tested' }
 }
 
 const REVIEW_AGREEMENT: Record<string, Agreement> = {
-  real_error: { mark: 'pass', label: 'Reviewer agrees' },
-  not_error: { mark: 'fail', label: 'Reviewer disagrees' },
-  cannot_tell: { mark: 'unknown', label: 'Reviewer unsure' },
+  real_error: { mark: 'pass', label: 'Second opinion agrees' },
+  not_error: { mark: 'fail', label: 'Second opinion disagrees' },
+  cannot_tell: { mark: 'unknown', label: 'Second opinion unsure' },
 }
 
 export function reviewAgreement(finding: Finding): Agreement {
-  if (!finding.review) return { mark: 'skipped', label: 'No reviewer' }
+  if (!finding.review) return { mark: 'skipped', label: 'No second opinion' }
   return REVIEW_AGREEMENT[finding.review.verdict] || { mark: 'unknown', label: finding.review.verdict }
 }
 

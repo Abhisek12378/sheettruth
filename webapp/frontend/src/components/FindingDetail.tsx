@@ -22,8 +22,8 @@ function ReviewSection({ finding }: { finding: Finding }) {
   if (!finding.review) {
     return (
       <section>
-        <h4>Reviewer model</h4>
-        <p className="muted">No second opinion was available for this audit.</p>
+        <h4>Second opinion</h4>
+        <p className="muted">No reviewer model was available for this audit.</p>
       </section>
     )
   }
@@ -40,7 +40,7 @@ export function FindingDetail({ finding, id }: { finding: Finding; id: string })
   return (
     <div className="finding-detail" id={id}>
       <section>
-        <h4>Formula</h4>
+        <h4>Current formula and proposed fix</h4>
         <p className="formula-pair">
           <code className="before">{finding.formula}</code>
           {finding.expected && (
@@ -56,11 +56,11 @@ export function FindingDetail({ finding, id }: { finding: Finding; id: string })
 
       <div className="finding-detail-grid">
         <section>
-          <h4>Model’s reason</h4>
+          <h4>Why it was flagged</h4>
           <p>{finding.reason || 'No reason given.'}</p>
           {finding.run_cells.length > 1 && (
             <p className="muted small">
-              Same formula pattern in {finding.run_cells.length} cells: <code>{finding.run_cells.join(', ')}</code>
+              The same formula appears in {finding.run_cells.length} cells: <code>{finding.run_cells.join(', ')}</code>
             </p>
           )}
         </section>
@@ -68,9 +68,9 @@ export function FindingDetail({ finding, id }: { finding: Finding; id: string })
       </div>
 
       <section>
-        <h4>Code checks on the workbook</h4>
+        <h4>Tests on your workbook</h4>
         {checks.length === 0 ? (
-          <p className="muted">No check could test this finding.</p>
+          <p className="muted">No test could be applied to this finding.</p>
         ) : (
           <ul className="checks">
             {checks.map((c) => (
@@ -81,7 +81,7 @@ export function FindingDetail({ finding, id }: { finding: Finding; id: string })
       </section>
 
       <section>
-        <h4>What the model saw</h4>
+        <h4>The exact cells the model read</h4>
         <pre className="window" tabIndex={0}>
           {finding.window}
         </pre>
