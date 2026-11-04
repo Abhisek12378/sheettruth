@@ -6,6 +6,10 @@ export const PRODUCT_NAME = 'SheetTruth'
 export const TAGLINE =
   'Finds the formulas in a workbook that compute the wrong thing, then checks every finding against the workbook itself before reporting it.'
 
+// Shown while the model step runs: the model server starts cold after a quiet spell.
+export const COLD_START_NOTE =
+  'The model server starts cold after a quiet spell, so the first audit in a while can spend an extra minute or two on this step. Nothing is stuck.'
+
 // Links shown in the footer. An empty string hides the link.
 export const GITHUB_URL = 'https://github.com/Abhisek12378/sheettruth'
 export const ADAPTER_URL = 'https://huggingface.co/Abhisek987/sheettruth-glimmer-30b-lora'

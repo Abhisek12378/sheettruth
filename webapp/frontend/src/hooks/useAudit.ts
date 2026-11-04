@@ -14,6 +14,7 @@ import {
 } from '../api'
 
 const POLL_MS = 2000
+const UNREACHABLE_MESSAGE = 'The audit server could not be reached. Check your connection and try again.'
 
 interface PollHandle {
   cancelled: boolean
@@ -22,6 +23,11 @@ interface PollHandle {
 
 function isActive(status: JobStatus): boolean {
   return status === 'queued' || status === 'running'
+}
+
+// A fetch that never got a response rejects with a TypeError; everything else carries the server's message.
+function friendlyMessage(e: Error): string {
+  return e instanceof TypeError ? UNREACHABLE_MESSAGE : e.message
 }
 
 // Fetches the job, hands it to onJob, and schedules the next fetch while the job is active.
@@ -46,6 +52,7 @@ function stopPolling(handle: PollHandle): void {
 
 export interface AuditState {
   health: Health | null
+  unreachable: boolean
   jobs: Job[]
   selectedId: string | null
   selected: JobDetail | null
@@ -54,10 +61,12 @@ export interface AuditState {
   select: (id: string) => void
   submit: (file: File, threshold: number) => void
   dismissError: () => void
+  retry: () => void
 }
 
 export function useAudit(): AuditState {
   const [health, setHealth] = useState<Health | null>(null)
+  const [unreachable, setUnreachable] = useState(false)
   const [jobs, setJobs] = useState<Job[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selected, setSelected] = useState<JobDetail | null>(null)
@@ -70,22 +79,38 @@ export function useAudit(): AuditState {
       .catch(() => undefined)
   }, [])
 
-  useEffect(() => {
+  const refreshHealth = useCallback(() => {
     fetchHealth()
-      .then(setHealth)
-      .catch(() => setHealth(null))
+      .then((h) => {
+        setHealth(h)
+        setUnreachable(false)
+      })
+      .catch(() => {
+        setHealth(null)
+        setUnreachable(true)
+      })
+  }, [])
+
+  const retry = useCallback(() => {
+    refreshHealth()
     refreshJobs()
-  }, [refreshJobs])
+  }, [refreshHealth, refreshJobs])
+
+  useEffect(retry, [retry])
 
   const onJob = useCallback(
     (job: JobDetail) => {
       setSelected(job)
-      if (!isActive(job.status)) refreshJobs()
+      setUnreachable(false)
+      if (!isActive(job.status)) retry()
     },
-    [refreshJobs],
+    [retry],
   )
 
-  const onPollError = useCallback((e: Error) => setError(e.message), [])
+  const onPollError = useCallback((e: Error) => {
+    setError(friendlyMessage(e))
+    if (e instanceof TypeError) setUnreachable(true)
+  }, [])
 
   // Poll the selected audit while it is queued or running.
   useEffect(() => {
@@ -102,15 +127,27 @@ export function useAudit(): AuditState {
       createJob(file, threshold)
         .then((job) => {
           setSelectedId(job.id)
-          refreshJobs()
+          retry()
         })
-        .catch((e: Error) => setError(e.message))
+        .catch((e: Error) => setError(friendlyMessage(e)))
         .finally(() => setUploading(false))
     },
-    [refreshJobs],
+    [retry],
   )
 
   const dismissError = useCallback(() => setError(''), [])
 
-  return { health, jobs, selectedId, selected, uploading, error, select: setSelectedId, submit, dismissError }
+  return {
+    health,
+    unreachable,
+    jobs,
+    selectedId,
+    selected,
+    uploading,
+    error,
+    select: setSelectedId,
+    submit,
+    dismissError,
+    retry,
+  }
 }

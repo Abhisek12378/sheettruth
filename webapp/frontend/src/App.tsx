@@ -1,10 +1,12 @@
 import type { Summary as SummaryData } from './api'
+import { EmptyState } from './components/EmptyState'
 import { Findings } from './components/Findings'
 import { Footer } from './components/Footer'
 import { HealthBar } from './components/HealthBar'
 import { History } from './components/History'
 import { Landing } from './components/Landing'
 import { Progress } from './components/Progress'
+import { ServerBanner } from './components/ServerBanner'
 import { StructureTable } from './components/StructureTable'
 import { Summary } from './components/Summary'
 import { ThemeToggle } from './components/ThemeToggle'
@@ -23,6 +25,17 @@ function RunLog({ notes }: { notes: string[] }) {
         ))}
       </ul>
     </details>
+  )
+}
+
+function ErrorNotice({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+  return (
+    <div className="error error-notice" role="alert">
+      <span>{message}</span>
+      <button type="button" className="link-button" onClick={onDismiss}>
+        Dismiss
+      </button>
+    </div>
   )
 }
 
@@ -54,13 +67,12 @@ export default function App() {
       <History jobs={audit.jobs} selected={audit.selectedId} onSelect={audit.select} />
 
       <main>
+        {audit.unreachable && <ServerBanner onRetry={audit.retry} />}
         <Landing />
         <UploadCard busy={audit.uploading} onSubmit={audit.submit} />
-        {audit.error && (
-          <p className="error" role="alert">
-            {audit.error}
-          </p>
-        )}
+        {audit.error && <ErrorNotice message={audit.error} onDismiss={audit.dismissError} />}
+
+        {!selected && !audit.error && <EmptyState hasHistory={audit.jobs.length > 0} />}
 
         {selected && selected.status !== 'done' && <Progress job={selected} />}
 

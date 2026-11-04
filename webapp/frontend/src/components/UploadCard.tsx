@@ -7,6 +7,13 @@ interface Props {
 }
 
 const DEFAULT_THRESHOLD = 0.5
+const WORKBOOK_SUFFIXES = ['.xlsx', '.xlsm']
+const WRONG_TYPE_MESSAGE = 'That is not an Excel workbook. Choose a file that ends in .xlsx or .xlsm.'
+
+function isWorkbook(file: File): boolean {
+  const name = file.name.toLowerCase()
+  return WORKBOOK_SUFFIXES.some((suffix) => name.endsWith(suffix))
+}
 
 function WorkbookIcon() {
   return (
@@ -46,11 +53,39 @@ function StrictnessPicker({ value, onChange }: { value: number; onChange: (t: nu
   )
 }
 
+function DropzoneText({ file }: { file: File | null }) {
+  if (file) {
+    return (
+      <div className="dropzone-text">
+        <strong>{file.name}</strong>
+        <span className="muted small">{formatKilobytes(file.size)} · drop another file to replace it</span>
+      </div>
+    )
+  }
+  return (
+    <div className="dropzone-text">
+      <strong>Drop a workbook here</strong>
+      <span className="muted small">or click to choose an .xlsx or .xlsm file</span>
+    </div>
+  )
+}
+
 export function UploadCard({ busy, onSubmit }: Props) {
   const [file, setFile] = useState<File | null>(null)
   const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD)
   const [dragging, setDragging] = useState(false)
+  const [message, setMessage] = useState('')
   const input = useRef<HTMLInputElement>(null)
+
+  function choose(candidate: File | undefined) {
+    if (!candidate) return
+    if (!isWorkbook(candidate)) {
+      setMessage(WRONG_TYPE_MESSAGE)
+      return
+    }
+    setMessage('')
+    setFile(candidate)
+  }
 
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -60,8 +95,7 @@ export function UploadCard({ busy, onSubmit }: Props) {
   function drop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault()
     setDragging(false)
-    const dropped = event.dataTransfer.files[0]
-    if (dropped) setFile(dropped)
+    choose(event.dataTransfer.files[0])
   }
 
   function dragOver(event: DragEvent<HTMLDivElement>) {
@@ -70,7 +104,8 @@ export function UploadCard({ busy, onSubmit }: Props) {
   }
 
   function pick(event: ChangeEvent<HTMLInputElement>) {
-    setFile(event.target.files?.[0] ?? null)
+    choose(event.target.files?.[0])
+    event.target.value = ''
   }
 
   function keyOpen(event: KeyboardEvent<HTMLDivElement>) {
@@ -87,6 +122,7 @@ export function UploadCard({ busy, onSubmit }: Props) {
         role="button"
         tabIndex={0}
         aria-label={file ? `Chosen workbook ${file.name}. Choose another.` : 'Choose a workbook to audit'}
+        aria-describedby={message ? 'upload-message' : undefined}
         onDrop={drop}
         onDragOver={dragOver}
         onDragLeave={() => setDragging(false)}
@@ -95,17 +131,7 @@ export function UploadCard({ busy, onSubmit }: Props) {
       >
         <input ref={input} type="file" accept=".xlsx,.xlsm" hidden onChange={pick} aria-label="Workbook file" />
         <WorkbookIcon />
-        {file ? (
-          <div className="dropzone-text">
-            <strong>{file.name}</strong>
-            <span className="muted small">{formatKilobytes(file.size)} · drop another file to replace it</span>
-          </div>
-        ) : (
-          <div className="dropzone-text">
-            <strong>Drop a workbook here</strong>
-            <span className="muted small">or click to choose an .xlsx or .xlsm file</span>
-          </div>
-        )}
+        <DropzoneText file={file} />
       </div>
 
       <StrictnessPicker value={threshold} onChange={setThreshold} />
@@ -113,6 +139,12 @@ export function UploadCard({ busy, onSubmit }: Props) {
       <button type="submit" className="primary" disabled={!file || busy}>
         {busy ? 'Uploading…' : 'Audit workbook'}
       </button>
+
+      {message && (
+        <p id="upload-message" className="upload-message" role="alert">
+          {message}
+        </p>
+      )}
     </form>
   )
 }
