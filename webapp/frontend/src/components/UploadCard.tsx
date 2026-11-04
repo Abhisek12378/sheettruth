@@ -1,4 +1,13 @@
-import { useRef, useState, type ChangeEvent, type DragEvent, type FormEvent, type KeyboardEvent } from 'react'
+import {
+  useCallback,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react'
+import { SAMPLE_WORKBOOK, useSampleWorkbook } from '../hooks/useSampleWorkbook'
 import { STRICTNESS, formatKilobytes } from '../labels'
 
 interface Props {
@@ -80,14 +89,19 @@ export function UploadCard({ busy, onSubmit }: Props) {
   const [message, setMessage] = useState('')
   const input = useRef<HTMLInputElement>(null)
 
+  const accept = useCallback((candidate: File) => {
+    setMessage('')
+    setFile(candidate)
+  }, [])
+  const sample = useSampleWorkbook(accept, setMessage)
+
   function choose(candidate: File | undefined) {
     if (!candidate) return
     if (!isWorkbook(candidate)) {
       setMessage(WRONG_TYPE_MESSAGE)
       return
     }
-    setMessage('')
-    setFile(candidate)
+    accept(candidate)
   }
 
   function submit(event: FormEvent) {
@@ -135,6 +149,13 @@ export function UploadCard({ busy, onSubmit }: Props) {
         <input ref={input} type="file" accept=".xlsx,.xlsm" hidden onChange={pick} aria-label="Workbook file" />
         <UploadIcon />
         <DropzoneText file={file} />
+      </div>
+
+      <div className="sample">
+        <button type="button" className="secondary" onClick={sample.load} disabled={sample.loading || busy}>
+          {sample.loading ? 'Loading the sample…' : 'Try a sample workbook'}
+        </button>
+        <span className="muted small">{SAMPLE_WORKBOOK.description}</span>
       </div>
 
       {message && (

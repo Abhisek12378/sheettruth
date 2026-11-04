@@ -657,6 +657,15 @@ main {
   font-size: 0.9rem;
 }
 
+.sample {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-top: calc(-1 * var(--s-2));
+}
+
 .upload-controls {
   display: flex;
   justify-content: space-between;
@@ -1741,6 +1750,10 @@ td.mono {
   .upload-controls {
     flex-direction: column;
     align-items: stretch;
+  }
+  .sample {
+    flex-direction: column;
+    text-align: center;
   }
   .strictness-options {
     flex-wrap: wrap;
