@@ -6,6 +6,9 @@ added instead of subtracted. Excel accepts all of these; they only show up when 
 labels. SheetTruth reads the labels with a fine-tuned open-weights model, then checks every finding
 against the workbook itself before it reports it.
 
+Live: [sheettruth.com](https://sheettruth.com). Code, data recipe, training, evaluation and the
+web app are all in this repository.
+
 ## How it works
 
 ```
@@ -118,6 +121,38 @@ cells that review called real inconsistencies. The review pack and answers are i
 
 Three of the 33 errors are not covered: one uses a custom add-in function, one uses ROUND, one is
 a value cell. Per-error tables, categories and the full false-alarm lists are in `reports/`.
+
+### Second benchmark: ExceLint corpus
+
+To check that the Enron numbers are not specific to one corpus, the same pipeline was run on the
+benchmark of the ExceLint study (Barowy, Berger and Zorn, OOPSLA 2018): 70 spreadsheets from the
+EUSES corpus, audited by hand by the authors, with 700 annotated cells. 587 of them hold formulas;
+grouped into runs they give 317 documented formula errors in 36 workbooks, 314 of them in scope.
+The audit does not record the correct formula, so the "exact fix" count is not available here.
+The set is prepared by `scripts/prepare_excelint.sh`; the leakage filter found no training
+workbook (Enron or Sheetpedia index) that matches any of the 70 files. The P(error) cutoff was
+fixed at 0.5 on the Enron set before this benchmark was run; nothing was tuned on it.
+
+6,210 windows covering 19,180 formula cells.
+
+| system | documented errors found (of 314 covered) | flagged windows outside the documented set | precision |
+|---|---|---|---|
+| v2, P(error) >= 0.5 | 100 | 185 | 0.35 |
+| v2 + verify agent | (fill in) | (fill in) | (fill in) |
+| v2 + verify agent + reviewer second opinion | (fill in) | (fill in) | (fill in) |
+
+Lowering the cutoff to 0.3 finds 120 at 343 flagged windows outside the list. Full report:
+`reports/excelint_eval_v2_full.md`.
+
+### A third fine-tune that was not shipped
+
+A third adapter (v3) was trained on 30,736 examples, twice the v2 set, built the same way from
+the Enron corpus plus the Sheetpedia corpus (web and forum spreadsheets). On the Enron set it
+looked like a clear win: 24 of 29 found at P(error) >= 0.5, and 22 found with 137 flagged windows
+outside the list at 0.99, against 18 and 222 for v2. On the ExceLint set, at every cutoff, it was
+behind v2: 77 found with 235 outside the list at 0.5 (v2: 100 and 185), 20 found at the 0.99
+cutoff that worked on Enron. The gain was specific to Enron-style workbooks and did not transfer,
+so v2 stays deployed. Reports: `reports/enron_eval_v3_model*.md`, `reports/excelint_eval_v3_model.md`.
 
 ## Running it
 
