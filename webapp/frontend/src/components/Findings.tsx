@@ -1,54 +1,29 @@
 import { useState } from 'react'
 import type { Finding, FindingStatus } from '../api'
-import { STATUS_HELP, STATUS_ORDER, STATUS_TITLE, percent, typeTitle } from '../labels'
-import { FindingDetail } from './FindingDetail'
+import { findingKey } from '../findings'
+import { STATUS_HELP, STATUS_ORDER, STATUS_TITLE } from '../labels'
+import { FindingRow } from './FindingRow'
 import { StatusIcon } from './StatusIcon'
-
-function findingKey(f: Finding): string {
-  return `${f.sheet}!${f.addr}`
-}
-
-function FindingRow({ finding, open, onToggle }: { finding: Finding; open: boolean; onToggle: () => void }) {
-  return (
-    <li className={`finding${open ? ' open' : ''}`}>
-      <button type="button" className="finding-head" onClick={onToggle}>
-        <span className="cell">
-          {finding.sheet}!{finding.addr}
-          {finding.run_cells.length > 1 && <small> +{finding.run_cells.length - 1}</small>}
-        </span>
-        <span className="type">{typeTitle(finding.type)}</span>
-        <span className="formulas">
-          <code>{finding.formula}</code>
-          {finding.expected && (
-            <>
-              <span className="arrow">→</span>
-              <code>{finding.expected}</code>
-            </>
-          )}
-        </span>
-        <span className="prob" title="Model's error probability">
-          {percent(finding.p_error)}
-        </span>
-      </button>
-      {open && <FindingDetail finding={finding} />}
-    </li>
-  )
-}
 
 function StatusGroup({ status, findings }: { status: FindingStatus; findings: Finding[] }) {
   const [openKey, setOpenKey] = useState<string | null>(null)
   if (findings.length === 0) return null
   return (
-    <section className={`group ${status}`}>
-      <h3>
-        <StatusIcon status={status} /> {STATUS_TITLE[status]} <span className="count">{findings.length}</span>
-      </h3>
-      <p className="muted small">{STATUS_HELP[status]}</p>
+    <section className={`group ${status}`} aria-labelledby={`group-${status}`}>
+      <div className="group-head">
+        <h3 id={`group-${status}`}>
+          <StatusIcon status={status} />
+          {STATUS_TITLE[status]}
+          <span className="count">{findings.length}</span>
+        </h3>
+        <p className="muted small">{STATUS_HELP[status]}</p>
+      </div>
       <ul className="findings">
         {findings.map((f) => (
           <FindingRow
             key={findingKey(f)}
             finding={f}
+            detailId={`detail-${status}-${findingKey(f)}`}
             open={openKey === findingKey(f)}
             onToggle={() => setOpenKey(openKey === findingKey(f) ? null : findingKey(f))}
           />
@@ -59,17 +34,16 @@ function StatusGroup({ status, findings }: { status: FindingStatus; findings: Fi
 }
 
 export function Findings({ findings }: { findings: Finding[] }) {
-  if (findings.length === 0) {
-    return (
-      <div className="card">
-        <h2>Model findings</h2>
-        <p className="muted">No formula was flagged at this strictness.</p>
-      </div>
-    )
-  }
   return (
-    <div className="card">
-      <h2>Model findings</h2>
+    <div className="card findings-card">
+      <div className="card-head">
+        <h2>Model findings</h2>
+        <p className="muted small">
+          {findings.length === 0
+            ? 'No formula was flagged at this strictness.'
+            : 'Each row is one run of identical formulas. Open a row for the reason, the code checks, the reviewer’s view and the exact window the model read.'}
+        </p>
+      </div>
       {STATUS_ORDER.map((status) => (
         <StatusGroup key={status} status={status} findings={findings.filter((f) => f.status === status)} />
       ))}

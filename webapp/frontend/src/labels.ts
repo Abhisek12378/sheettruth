@@ -79,6 +79,13 @@ export const CHECK_TITLE: Record<string, string> = {
   value_plausibility: 'Value plausibility',
 }
 
+export const CHECK_RESULT_TITLE: Record<string, string> = {
+  supports: 'Supports',
+  contradicts: 'Contradicts',
+  neutral: 'Neutral',
+  skipped: 'Skipped',
+}
+
 export const REVIEW_TITLE: Record<string, string> = {
   real_error: 'Reviewer: real error',
   not_error: 'Reviewer: not an error',

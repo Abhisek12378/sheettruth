@@ -14,17 +14,23 @@ export function Summary({ job, summary }: Props) {
       <div className="summary-head">
         <div>
           <h2>{job.filename}</h2>
-          <p className="muted">
+          <p className="muted small">
             {summary.formula_cells} formula cells in {summary.windows} windows
             {summary.out_of_scope > 0 && ` · ${summary.out_of_scope} out of scope`} · flagged at P(error) ≥{' '}
-            {job.threshold} · {duration(job)}
+            {job.threshold} · finished in {duration(job)}
           </p>
         </div>
-        <div className="downloads">
-          <a href={downloadUrl(job.id, 'corrected.xlsx')}>Corrected workbook</a>
-          <a href={downloadUrl(job.id, 'report.md')}>Report (Markdown)</a>
-          <a href={downloadUrl(job.id, 'report.json')}>Full detail (JSON)</a>
-        </div>
+        <nav className="downloads" aria-label="Downloads">
+          <a href={downloadUrl(job.id, 'corrected.xlsx')} download>
+            Corrected workbook
+          </a>
+          <a href={downloadUrl(job.id, 'report.md')} download>
+            Report (Markdown)
+          </a>
+          <a href={downloadUrl(job.id, 'report.json')} download>
+            Full detail (JSON)
+          </a>
+        </nav>
       </div>
       <div className="tiles">
         {STATUS_ORDER.map((status) => (
